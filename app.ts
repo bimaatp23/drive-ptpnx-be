@@ -10,5 +10,5 @@ app.use(bodyParser.json())
 app.use('/user', userRouter)
 
 app.listen(process.env.PORT, () => {
-    console.log('Node server started running')
+    console.log('Server is running on port ' + process.env.PORT)
 })
