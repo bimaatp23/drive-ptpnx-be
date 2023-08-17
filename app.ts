@@ -1,13 +1,13 @@
 import * as bodyParser from 'body-parser'
 import * as dotenv from 'dotenv'
 import express from 'express'
-import { userRouter } from './routes/userRouter'
+import { userRouter } from './src/routes/UserRouter'
 
 const app = express()
 dotenv.config()
 
 app.use(bodyParser.json())
-app.use('/users', userRouter)
+app.use('/user', userRouter)
 
 app.listen(process.env.PORT, () => {
     console.log('Node server started running')
