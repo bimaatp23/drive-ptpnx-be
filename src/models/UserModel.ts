@@ -5,6 +5,7 @@ import { User } from '../../src/types/user/User'
 import { LoginReq } from '../types/user/LoginReq'
 import { BaseResp } from '../types/BaseResp'
 import { LoginResp } from '../types/user/LoginResp'
+import jwt from 'jsonwebtoken'
 
 export const login = (req: LoginReq, callback: Function) => {
     db.query(
@@ -20,17 +21,25 @@ export const login = (req: LoginReq, callback: Function) => {
                             errorMessage: 'Incorrect Username or Password '
                         }
                     } as BaseResp)
-                else callback(null, {
-                    errorSchema: {
-                        errorCode: 200,
-                        errorMessage: 'Login Success'
-                    },
-                    outputSchema: {
+                else {
+                    const user: User = {
                         name: row.name,
                         role: row.role,
                         username: row.username
                     }
-                } as LoginResp)
+                    callback(null, {
+                        errorSchema: {
+                            errorCode: 200,
+                            errorMessage: 'Login Success'
+                        },
+                        outputSchema: {
+                            name: user.name,
+                            role: user.role,
+                            username: user.username,
+                            token: jwt.sign(user, 'NikenPuspitaLarasati27072001', { expiresIn: '1h' })
+                        }
+                    } as LoginResp)
+                }
             }
         }
     )
