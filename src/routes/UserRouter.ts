@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import { QueryError } from 'mysql2'
 import { BaseResp } from '../../src/types/BaseResp'
-import * as userModel from '../models/UserModel'
+import * as UserModel from '../models/UserModel'
 import { LoginReq } from '../types/user/LoginReq'
 import { authenticateJWT } from './AuthMiddleware'
 import DataParser from './DataParser'
@@ -14,22 +14,22 @@ const errorResponse = (err: QueryError): BaseResp => {
         }
     }
 }
-const userRouter = express.Router()
+const UserRouter = express.Router()
 
-userRouter.post('/login', DataParser.single('file'), async (req: Request, res: Response) => {
+UserRouter.post('/login', DataParser.single('file'), async (req: Request, res: Response) => {
     const request: LoginReq = req.body
-    userModel.login(request, (err: QueryError, resp: BaseResp) => {
+    UserModel.login(request, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResponse(err).errorSchema.errorCode).json(errorResponse(err))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-userRouter.get('/all', authenticateJWT, async (req: Request, res: Response) => {
-    userModel.getAll(((err: QueryError, resp: BaseResp) => {
+UserRouter.get('/all', authenticateJWT, async (req: Request, res: Response) => {
+    UserModel.getAll(((err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResponse(err).errorSchema.errorCode).json(errorResponse(err))
         else res.status(resp.errorSchema.errorCode).json(resp)
     }))
 })
 
-export { userRouter }
+export { UserRouter }
 

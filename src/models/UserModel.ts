@@ -9,7 +9,7 @@ import jwt from 'jsonwebtoken'
 
 export const login = (req: LoginReq, callback: Function) => {
     db.query(
-        'SELECT * FROM users WHERE username = ? AND password = ?',
+        'SELECT * FROM user WHERE username = ? AND password = ?',
         [req.username, req.password],
         (err, result) => {
             if (err) callback(err)
@@ -47,17 +47,17 @@ export const login = (req: LoginReq, callback: Function) => {
 
 export const getAll = (callback: Function) => {
     db.query(
-        'SELECT * FROM users',
+        'SELECT * FROM user',
         null,
         (err, result) => {
             if (err) callback(err)
             else {
                 const row = (<RowDataPacket[]> result)
-                const users: User[] = row.map((data) => {
+                const users: User[] = row.map((user) => {
                     return {
-                        name: data.name,
-                        role: data.role,
-                        username: data.username
+                        name: user.name,
+                        role: user.role,
+                        username: user.username
                     }
                 })
                 callback(null, {
