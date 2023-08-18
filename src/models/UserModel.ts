@@ -3,6 +3,7 @@ import { RowDataPacket } from 'mysql2'
 import { db } from '../../db'
 import { GetUsersResp } from '../../src/types/user/GetUsersResp'
 import { User } from '../../src/types/user/User'
+import { PublicConstant } from '../PublicConstant'
 import { BaseResp } from '../types/BaseResp'
 import { JWTRequest } from '../types/JWTRequest'
 import { LoginReq } from '../types/user/LoginReq'
@@ -38,7 +39,7 @@ export const login = (req: JWTRequest, callback: Function) => {
                             name: user.name,
                             role: user.role,
                             username: user.username,
-                            token: jwt.sign(user, process.env.SECRET_KEY as string, { expiresIn: '1h' })
+                            token: jwt.sign(user, (process.env.SECRET_KEY ?? PublicConstant.SECRET_KEY) as string, { expiresIn: '1h' })
                         }
                     } as LoginResp)
                 }

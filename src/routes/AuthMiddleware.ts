@@ -1,5 +1,6 @@
 import { NextFunction, Response } from 'express'
 import jwt from 'jsonwebtoken'
+import { PublicConstant } from '../PublicConstant'
 import { BaseResp } from '../types/BaseResp'
 import { JWTRequest } from '../types/JWTRequest'
 
@@ -14,7 +15,7 @@ export const authenticateJWT = (req: JWTRequest, res: Response, next: NextFuncti
     } as BaseResp)
   }
 
-  jwt.verify(token, process.env.SECRET_KEY as string, (err, payload) => {
+  jwt.verify(token, (process.env.SECRET_KEY ?? PublicConstant.SECRET_KEY) as string, (err, payload) => {
     if (err) {
         return res.status(403).json({
             errorSchema: {

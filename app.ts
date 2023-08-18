@@ -1,6 +1,7 @@
 import * as bodyParser from 'body-parser'
 import * as dotenv from 'dotenv'
 import express from 'express'
+import { PublicConstant } from './src/PublicConstant'
 import { DataRouter } from './src/routes/DataRouter'
 import { UserRouter } from './src/routes/UserRouter'
 
@@ -11,6 +12,6 @@ app.use(bodyParser.json())
 app.use('/user', UserRouter)
 app.use('/data', DataRouter)
 
-app.listen((process.env.PORT), () => {
-    console.log('Server is running on port ' + process.env.PORT + ' ' + process.env.SERVER)
+app.listen((process.env.PORT ?? PublicConstant.PORT), () => {
+    console.log('Server is running on port ' + (process.env.PORT ?? PublicConstant.PORT) + ' ' + (process.env.SERVER ?? PublicConstant.SERVER))
 })
