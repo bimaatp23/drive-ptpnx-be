@@ -2,6 +2,7 @@
     "SERVER": "PRODUCTION",
     "PORT": 3030,
     "FTP_HOST": "ftp.ptpnx.com",
+    "FTP_DIR": "/",
     "FTP_PORT": 21,
     "FTP_USER": "u884503388.drive",
     "FTP_PWD": "FTPDrive!23",
