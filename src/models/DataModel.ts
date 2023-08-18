@@ -3,6 +3,7 @@ import { db } from '../../db'
 import { JWTRequest } from '../types/JWTRequest'
 import { Data } from '../types/data/Data'
 import { GetDatasResp } from '../types/data/GetDatasResp'
+import { TimestampToDate } from '../utils/DateMaker'
 
 export const getAll = (req: JWTRequest, callback: Function) => {
     db.query(
@@ -13,7 +14,7 @@ export const getAll = (req: JWTRequest, callback: Function) => {
                 const row = (<RowDataPacket[]> result)
                 const datas: Data[] = row.map((data) => {
                     return {
-                        tanggal: data.tanggal,
+                        tanggal: TimestampToDate(data.tanggal),
                         noDokumen: data.no_dokumen,
                         keterangan: data.keterangan,
                         file: data.file,
@@ -43,7 +44,7 @@ export const getByCategory = (req: JWTRequest, callback: Function) => {
                 const row = (<RowDataPacket[]> result)
                 const datas: Data[] = row.map((data) => {
                     return {
-                        tanggal: data.tanggal,
+                        tanggal: TimestampToDate(data.tanggal),
                         noDokumen: data.no_dokumen,
                         keterangan: data.keterangan,
                         file: data.file,
