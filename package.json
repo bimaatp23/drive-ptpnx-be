@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon --watch src --exec ts-node app.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "postbuild": "npm run start"
   },
   "keywords": [],
   "author": "",
