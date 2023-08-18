@@ -13,5 +13,5 @@ app.use('/user', UserRouter)
 app.use('/data', DataRouter)
 
 app.listen((process.env.PORT ?? variable.PORT), () => {
-    console.log('Server is running on port ' + (process.env.PORT ?? variable.PORT))
+    console.log('Server is running on port ' + (process.env.PORT ?? variable.PORT) + ' ' + (process.env.SERVER ?? variable.SERVER))
 })
