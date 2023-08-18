@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
-import { RowDataPacket } from 'mysql2'
-import { db } from '../../db'
+import mysql, { RowDataPacket } from 'mysql2'
+import { dbConfig } from '../../db'
 import { GetUsersResp } from '../../src/types/user/GetUsersResp'
 import { User } from '../../src/types/user/User'
 import { PublicConstant } from '../PublicConstant'
@@ -11,6 +11,7 @@ import { LoginResp } from '../types/user/LoginResp'
 
 export const login = (req: JWTRequest, callback: Function) => {
     const loginReq: LoginReq = req.body
+    const db = mysql.createConnection(dbConfig)
     db.query(
         'SELECT * FROM user WHERE username = ? AND password = ?',
         [loginReq.username, loginReq.password],
@@ -44,11 +45,13 @@ export const login = (req: JWTRequest, callback: Function) => {
                     } as LoginResp)
                 }
             }
+            db.end()
         }
     )
 }
 
 export const getAll = (req: JWTRequest, callback: Function) => {
+    const db = mysql.createConnection(dbConfig)
     db.query(
         'SELECT * FROM user',
         null,
@@ -71,6 +74,7 @@ export const getAll = (req: JWTRequest, callback: Function) => {
                     outputSchema: users
                 } as GetUsersResp)
             }
+            db.end()
         }
     )
 }

@@ -1,11 +1,12 @@
-import { RowDataPacket } from 'mysql2'
-import { db } from '../../db'
+import mysql, { RowDataPacket } from 'mysql2'
+import { dbConfig } from '../../db'
 import { JWTRequest } from '../types/JWTRequest'
 import { Data } from '../types/data/Data'
 import { GetDatasResp } from '../types/data/GetDatasResp'
 import { TimestampToDate } from '../utils/DateMaker'
 
 export const getAll = (req: JWTRequest, callback: Function) => {
+    const db = mysql.createConnection(dbConfig)
     db.query(
         'SELECT * FROM data',
         (err, result) => {
@@ -30,11 +31,13 @@ export const getAll = (req: JWTRequest, callback: Function) => {
                     outputSchema: datas
                 } as GetDatasResp)
             }
+            db.end()
         }
     )
 }
 
 export const getByCategory = (req: JWTRequest, callback: Function) => {
+    const db = mysql.createConnection(dbConfig)
     db.query(
         'SELECT * FROM data WHERE kategori = ?',
         req.params.kategori,
@@ -60,6 +63,7 @@ export const getByCategory = (req: JWTRequest, callback: Function) => {
                     outputSchema: datas
                 } as GetDatasResp)
             }
+            db.end()
         }
     )
 }
