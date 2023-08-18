@@ -1,8 +1,9 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { BaseResp } from '../types/BaseResp'
+import { JWTRequest } from '../types/JWTRequest'
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateJWT = (req: JWTRequest, res: Response, next: NextFunction) => {
   const token = req.header('Authorization')?.split(' ')[1]
   if (!token) {
     return res.status(401).json({
@@ -13,7 +14,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     } as BaseResp)
   }
 
-  jwt.verify(token, 'NikenPuspitaLarasati27072001', (err, user) => {
+  jwt.verify(token, 'NikenPuspitaLarasati27072001', (err, payload) => {
     if (err) {
         return res.status(403).json({
             errorSchema: {
@@ -23,6 +24,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
         } as BaseResp)
     }
 
+    req.payload = payload
     next()
   })
 }

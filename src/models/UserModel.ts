@@ -1,16 +1,18 @@
+import jwt from 'jsonwebtoken'
 import { RowDataPacket } from 'mysql2'
 import { db } from '../../db'
 import { GetUsersResp } from '../../src/types/user/GetUsersResp'
 import { User } from '../../src/types/user/User'
-import { LoginReq } from '../types/user/LoginReq'
 import { BaseResp } from '../types/BaseResp'
+import { JWTRequest } from '../types/JWTRequest'
+import { LoginReq } from '../types/user/LoginReq'
 import { LoginResp } from '../types/user/LoginResp'
-import jwt from 'jsonwebtoken'
 
-export const login = (req: LoginReq, callback: Function) => {
+export const login = (req: JWTRequest, callback: Function) => {
+    const loginReq: LoginReq = req.body
     db.query(
         'SELECT * FROM user WHERE username = ? AND password = ?',
-        [req.username, req.password],
+        [loginReq.username, loginReq.password],
         (err, result) => {
             if (err) callback(err)
             else {
@@ -45,7 +47,7 @@ export const login = (req: LoginReq, callback: Function) => {
     )
 }
 
-export const getAll = (callback: Function) => {
+export const getAll = (req: JWTRequest, callback: Function) => {
     db.query(
         'SELECT * FROM user',
         null,
