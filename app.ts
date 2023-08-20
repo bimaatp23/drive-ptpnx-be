@@ -7,9 +7,11 @@ import { UserRouter } from './src/routes/UserRouter'
 const app = express()
 dotenv.config()
 
+const endPoint: string = '/drive/api'
+
 app.use(bodyParser.json())
-app.use('/user', UserRouter)
-app.use('/data', DataRouter)
+app.use(endPoint + '/user', UserRouter)
+app.use(endPoint + '/data', DataRouter)
 
 app.listen(process.env.PORT, () => {
     console.log('Server is running on port ' + process.env.PORT + ' ' + process.env.SERVER)
