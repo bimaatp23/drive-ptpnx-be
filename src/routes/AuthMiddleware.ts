@@ -24,7 +24,7 @@ export const authenticateJWT = (req: JWTRequest, res: Response, next: NextFuncti
         } as BaseResp)
     }
 
-    req.payload = payload
+    req.payload = payload as any
     next()
   })
 }

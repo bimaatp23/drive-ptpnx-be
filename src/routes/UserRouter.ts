@@ -23,6 +23,13 @@ UserRouter.post('/login', DataParser.single('file'), async (req: JWTRequest, res
     })
 })
 
+UserRouter.post('/change-password', authenticateJWT, DataParser.single('file'), async (req: JWTRequest, res: Response) => {
+    UserModel.changePassword(req, (err: QueryError, resp: BaseResp) => {
+        if (err) return res.status(errorResponse(err).errorSchema.errorCode).json(errorResponse(err))
+        else res.status(resp.errorSchema.errorCode).json(resp)
+    })
+})
+
 UserRouter.get('/all', authenticateJWT, async (req: JWTRequest, res: Response) => {
     UserModel.getAll(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResponse(err).errorSchema.errorCode).json(errorResponse(err))
