@@ -5,9 +5,12 @@ import { DataRouter } from './src/routes/DataRouter'
 import { UserRouter } from './src/routes/UserRouter'
 
 const app = express()
+const cors = require('cors')
 dotenv.config()
 
 const endPoint: string = '/drive/api'
+
+app.use(cors())
 
 app.use(bodyParser.json())
 app.use(endPoint + '/user', UserRouter)
