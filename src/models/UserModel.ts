@@ -42,7 +42,7 @@ export const login = (req: JWTRequest, callback: Function) => {
                             name: user.name,
                             role: user.role,
                             username: user.username,
-                            token: jwt.sign(user, process.env.SECRET_KEY as string, { expiresIn: '1h' })
+                            token: jwt.sign(user, process.env.SECRET_KEY as string)
                         }
                     } as LoginResp)
                 }
