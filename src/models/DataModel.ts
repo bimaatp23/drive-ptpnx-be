@@ -39,8 +39,8 @@ export const getAll = (req: JWTRequest, callback: Function) => {
 export const getByCategory = (req: JWTRequest, callback: Function) => {
     const db = mysql.createConnection(dbConfig)
     db.query(
-        'SELECT * FROM data WHERE kategori = ?',
-        req.params.kategori,
+        'SELECT * FROM data WHERE kategori = ? AND author = ?',
+        [req.params.kategori, req.payload?.username],
         (err, result) => {
             if (err) callback(err)
             else {
