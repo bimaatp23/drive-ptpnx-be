@@ -15,15 +15,8 @@ const errorResponse = (err: QueryError): BaseResp => {
 }
 const DataRouter = express.Router()
 
-DataRouter.get('/all', authenticateJWT, async (req: JWTRequest, res: Response) => {
-    DataModel.getAll(req, (err: QueryError, resp: BaseResp) => {
-        if (err) return res.status(errorResponse(err).errorSchema.errorCode).json(errorResponse(err))
-        else res.status(resp.errorSchema.errorCode).json(resp)
-    })
-})
-
-DataRouter.get('/all/:kategori', authenticateJWT, async (req: JWTRequest, res: Response) => {
-    DataModel.getByCategory(req, (err: QueryError, resp: BaseResp) => {
+DataRouter.post('/', authenticateJWT, async (req: JWTRequest, res: Response) => {
+    DataModel.getData(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResponse(err).errorSchema.errorCode).json(errorResponse(err))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
