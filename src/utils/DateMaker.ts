@@ -13,7 +13,13 @@ export const DateToTimestamp = (
 }
 
 export const TimestampToDate = (unixTimestamp: string): string => {
-    const dateInMiliseconds = parseInt(unixTimestamp) * 1000
-    const convertedDate: string = new Date(dateInMiliseconds).toLocaleDateString()
-    return convertedDate
+    const timestamp = 1674777600
+    const date = new Date(parseInt(unixTimestamp) * 1000)
+
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+
+    const formattedDate = `${day}/${month}/${year}`
+    return formattedDate
 }
