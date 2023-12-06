@@ -1,15 +1,12 @@
 {
   "name": "drive-ptpnx-be",
   "version": "2.0.0",
-  "description": "",
-  "main": "index.js",
+  "author": "Bima Tribuana Putra",
   "scripts": {
     "dev": "nodemon --watch src --exec ts-node app.ts",
     "build": "tsc",
     "start": "node dist/app.js"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/jsonwebtoken": "^9.0.2",
