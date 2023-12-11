@@ -7,29 +7,26 @@ import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
 import { GetDatasResp } from "../types/data/GetDatasResp"
 import { UploadDataReq } from "../types/data/UploadDataReq"
-import { TimestampToDate } from "../utils/DateMaker"
 import { badRequestResp, baseResp, errorResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
 export const getData = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     const getDataReq: GetDatasReq = req.body
+    const payload = req.payload
     db.query(
         `SELECT * FROM data WHERE 
-            kategori = "${getDataReq.kategori}" AND 
-            tanggal >= "${new Date(getDataReq.tanggalFrom).getTime() / 1000}" AND
-            tanggal <= "${new Date(getDataReq.tanggalUntil).getTime() / 1000}" AND
-            no_dokumen LIKE "%${getDataReq.noDokumen}%" AND 
-            keterangan LIKE "%${getDataReq.keterangan}%" AND 
-            author = "${req.payload?.username}"
+            kategori = ? AND 
+            author = ?
             ORDER BY tanggal DESC`,
+        [getDataReq.kategori, payload?.username],
         (err, result) => {
             if (err) callback(err)
             else {
                 const row = (<RowDataPacket[]>result)
-                const datas: Data[] = row.map((data) => {
+                let datas: Data[] = row.map((data) => {
                     return {
-                        tanggal: TimestampToDate(data.tanggal),
+                        tanggal: data.tanggal,
                         noDokumen: data.no_dokumen,
                         keterangan: data.keterangan,
                         file: data.file,
@@ -37,6 +34,8 @@ export const getData = (req: JWTRequest, callback: Function) => {
                         author: data.author,
                     }
                 })
+                datas = datas.filter((data) => data.noDokumen.toLowerCase().includes(getDataReq.noDokumen))
+                datas = datas.filter((data) => data.keterangan.toLowerCase().includes(getDataReq.keterangan))
                 callback(null, baseResp(200, "Get Data Success", datas) as GetDatasResp)
             }
             db.end()
@@ -50,7 +49,6 @@ export const upload = (req: JWTRequest, callback: Function) => {
     const payload = req.payload
     const file = req.file
     const uuid = generateUUID()
-    console.log(uuid)
     if (file && payload) {
         db.query(
             "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?)",
