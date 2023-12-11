@@ -45,6 +45,15 @@ export const invalidTokenResp = (message?: string): BaseResp => {
     }
 }
 
+export const notFoundResp = (message?: string): BaseResp => {
+    return {
+        errorSchema: {
+            errorCode: 404,
+            errorMessage: message ?? "Not Found"
+        }
+    }
+}
+
 export const errorResp = (message: string): BaseResp => {
     return {
         errorSchema: {

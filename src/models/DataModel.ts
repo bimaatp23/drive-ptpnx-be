@@ -2,12 +2,13 @@ import * as fs from "fs"
 import mysql, { Connection, RowDataPacket } from "mysql2"
 import path from "path"
 import { dbConfig } from "../../db"
+import { BaseResp } from "../types/BaseResp"
 import { JWTRequest } from "../types/JWTRequest"
 import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
 import { GetDatasResp } from "../types/data/GetDatasResp"
 import { UploadDataReq } from "../types/data/UploadDataReq"
-import { badRequestResp, baseResp, errorResp } from "../utils/Response"
+import { badRequestResp, baseResp, errorResp, notFoundResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
 export const getData = (req: JWTRequest, callback: Function) => {
@@ -49,18 +50,18 @@ export const upload = (req: JWTRequest, callback: Function) => {
     const payload = req.payload
     const file = req.file
     const uuid = generateUUID()
-    if (file && payload) {
+    if (file) {
         db.query(
             "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [uuid, uploadDataReq.tanggal, uploadDataReq.noDokumen, uploadDataReq.keterangan, uploadDataReq.kategori, uuid + path.extname(file.filename), payload.username],
+            [uuid, uploadDataReq.tanggal, uploadDataReq.noDokumen, uploadDataReq.keterangan, uploadDataReq.kategori, uuid + path.extname(file.filename), payload?.username],
             (err) => {
                 if (err) {
                     callback(err, errorResp(err.message))
                 } else {
                     const sourcePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", file.filename)
-                    const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", uuid + path.extname(file.filename))
+                    const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", uuid + path.extname(file.filename))
                     fs.renameSync(sourcePath, destinationPath)
-                    callback(null, baseResp(200, "Upload success"))
+                    callback(null, baseResp(200, "Upload Data Success"))
                 }
                 db.end()
             }
@@ -68,4 +69,27 @@ export const upload = (req: JWTRequest, callback: Function) => {
     } else {
         callback(null, badRequestResp())
     }
+}
+
+export const download = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    const fileId = req.params.id
+    db.query(
+        "SELECT * FROM data WHERE id = ?",
+        [fileId],
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                if (row.length === 0) {
+                    callback(null, notFoundResp("File Not Found"))
+                } else {
+                    callback(null, baseResp(200, "Download Data Success", {
+                        file: row[0].file
+                    }) as BaseResp)
+                }
+            }
+            db.end()
+        }
+    )
 }
