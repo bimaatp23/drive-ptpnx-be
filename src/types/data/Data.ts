@@ -1,8 +1,9 @@
 export interface Data {
-    tanggal: string
-    noDokumen: string
-    keterangan: string
+    id: string
+    date: string
+    documentNumber: string
+    description: string
     file: string
-    kategori: string
+    category: string
     author: string
 }

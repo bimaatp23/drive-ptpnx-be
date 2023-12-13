@@ -17,10 +17,10 @@ export const getData = (req: JWTRequest, callback: Function) => {
     const payload = req.payload
     db.query(
         `SELECT * FROM data WHERE 
-            kategori = ? AND 
+            category = ? AND 
             author = ?
-            ORDER BY tanggal DESC`,
-        [getDataReq.kategori, payload?.username],
+            ORDER BY date DESC`,
+        [getDataReq.category, payload?.username],
         (err, result) => {
             if (err) callback(err)
             else {
@@ -28,16 +28,16 @@ export const getData = (req: JWTRequest, callback: Function) => {
                 let datas: Data[] = row.map((data) => {
                     return {
                         id: data.id,
-                        tanggal: data.tanggal,
-                        noDokumen: data.no_dokumen,
-                        keterangan: data.keterangan,
+                        date: data.date,
+                        documentNumber: data.document_number,
+                        description: data.description,
                         file: data.file,
-                        kategori: data.kategori,
-                        author: data.author,
+                        category: data.category,
+                        author: data.author
                     }
                 })
-                datas = datas.filter((data) => data.noDokumen.toLowerCase().includes(getDataReq.noDokumen))
-                datas = datas.filter((data) => data.keterangan.toLowerCase().includes(getDataReq.keterangan))
+                datas = datas.filter((data) => data.documentNumber.toLowerCase().includes(getDataReq.documentNumber))
+                datas = datas.filter((data) => data.description.toLowerCase().includes(getDataReq.description))
                 callback(null, baseResp(200, "Get Data Success", datas) as GetDatasResp)
             }
             db.end()
@@ -54,7 +54,7 @@ export const upload = (req: JWTRequest, callback: Function) => {
     if (file) {
         db.query(
             "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [uuid, uploadDataReq.tanggal, uploadDataReq.noDokumen, uploadDataReq.keterangan, uploadDataReq.kategori, uuid + path.extname(file.filename), payload?.username],
+            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.category, uuid + path.extname(file.filename), payload?.username],
             (err) => {
                 if (err) {
                     callback(err, errorResp(err.message))

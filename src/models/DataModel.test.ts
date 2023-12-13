@@ -119,9 +119,11 @@ describe("getData", () => {
     const mockRequest: JWTRequest = {
         ...mockRequestDefault,
         body: {
-            kategori: "exampleCategory",
-            noDokumen: "exampleDoc",
-            keterangan: "exampleDescription",
+            category: "",
+            dateFrom: "",
+            dateUntil: "",
+            documentNumber: "",
+            description: ""
         } as GetDatasReq,
         payload: {
             name: "John Doe",

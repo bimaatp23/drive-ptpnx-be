@@ -1,7 +1,7 @@
 export interface UploadDataReq {
-    tanggal: string
-    noDokumen: string
-    keterangan: string
-    kategori: string
+    date: string
+    documentNumber: string
+    description: string
+    category: string
     file: File | undefined
 }
