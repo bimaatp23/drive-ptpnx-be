@@ -1,4 +1,6 @@
 /node_modules
 /dist
 /src/uploads
+/coverage
 .env
+jest.config.js

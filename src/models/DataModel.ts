@@ -27,6 +27,7 @@ export const getData = (req: JWTRequest, callback: Function) => {
                 const row = (<RowDataPacket[]>result)
                 let datas: Data[] = row.map((data) => {
                     return {
+                        id: data.id,
                         tanggal: data.tanggal,
                         noDokumen: data.no_dokumen,
                         keterangan: data.keterangan,
