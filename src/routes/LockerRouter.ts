@@ -1,0 +1,16 @@
+import express, { Response } from "express"
+import { QueryError } from "mysql2"
+import * as LockerModel from "../models/LockerModel"
+import { BaseResp } from "../types/BaseResp"
+import { JWTRequest } from "../types/JWTRequest"
+import { errorResp } from "../utils/Response"
+import { authenticateJWT } from "./AuthMiddleware"
+
+export const LockerRouter = express.Router()
+
+LockerRouter.get("/", authenticateJWT, async (req: JWTRequest, res: Response) => {
+    LockerModel.getLocker(req, (err: QueryError, resp: BaseResp) => {
+        if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
+        else res.status(resp.errorSchema.errorCode).json(resp)
+    })
+})

@@ -33,6 +33,7 @@ export const getData = (req: JWTRequest, callback: Function) => {
                         description: data.description,
                         file: data.file,
                         category: data.category,
+                        lockerId: data.locker_id,
                         author: data.author
                     }
                 })
@@ -40,7 +41,7 @@ export const getData = (req: JWTRequest, callback: Function) => {
                     datas = datas.filter((data) => data.documentNumber?.toLowerCase().includes(getDataReq.documentNumber))
                     datas = datas.filter((data) => data.description?.toLowerCase().includes(getDataReq.description))
                 }
-                callback(null, baseResp(200, "Get Data Success", datas) as GetDatasResp)
+                callback(null, baseResp(200, "Get Data List Success", datas) as GetDatasResp)
             }
             db.end()
         }

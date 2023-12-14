@@ -5,5 +5,6 @@ export interface Data {
     description: string
     file: string
     category: string
+    lockerId: string
     author: string
 }

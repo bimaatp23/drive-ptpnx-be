@@ -5,6 +5,7 @@ import express from "express"
 import * as fs from "fs"
 import path from "path"
 import { DataRouter } from "./src/routes/DataRouter"
+import { LockerRouter } from "./src/routes/LockerRouter"
 import { UserRouter } from "./src/routes/UserRouter"
 
 const app = express()
@@ -20,6 +21,7 @@ if (!fs.existsSync(filePathTemp)) {
 app.use(BodyParser.json())
 app.use("/user", UserRouter)
 app.use("/data", DataRouter)
+app.use("/locker", LockerRouter)
 
 app.listen(process.env.PORT, () => {
     console.log("Server is running on port " + process.env.PORT + " " + process.env.SERVER)
