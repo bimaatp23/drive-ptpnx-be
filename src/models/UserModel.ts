@@ -8,6 +8,29 @@ import { LoginReq } from "../types/user/LoginReq"
 import { LoginResp } from "../types/user/LoginResp"
 import { badRequestResp, baseResp, unauthorizedResp } from "../utils/Response"
 
+export const getUsers = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    db.query(
+        "SELECT * FROM user",
+        null,
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                const users: User[] = row.map((user) => {
+                    return {
+                        name: user.name,
+                        role: user.role,
+                        username: user.username
+                    }
+                })
+                callback(null, baseResp(200, "Get All User Success", users) as GetUsersResp)
+            }
+            db.end()
+        }
+    )
+}
+
 export const login = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     const loginReq: LoginReq = req.body
@@ -15,9 +38,8 @@ export const login = (req: JWTRequest, callback: Function) => {
         "SELECT * FROM user WHERE username = ? AND password = ?",
         [loginReq.username, loginReq.password],
         (err, result) => {
-            if (err) {
-                callback(err)
-            } else {
+            if (err) callback(err)
+            else {
                 const row = (<RowDataPacket>result)[0]
                 if (!row) {
                     callback(null, unauthorizedResp("Incorrect Username or Password"))
@@ -49,9 +71,8 @@ export const changePassword = (req: JWTRequest, callback: Function) => {
             "SELECT * FROM user WHERE username = ? AND password = ?",
             [req.payload?.username, changePasswordReq.oldPassword],
             (err, result) => {
-                if (err) {
-                    callback(err)
-                } else {
+                if (err) callback(err)
+                else {
                     const row = (<RowDataPacket>result)[0]
                     if (!row) {
                         callback(null, unauthorizedResp("Old Password Is Wrong"))
@@ -74,29 +95,4 @@ export const changePassword = (req: JWTRequest, callback: Function) => {
             }
         )
     }
-}
-
-export const getAll = (req: JWTRequest, callback: Function) => {
-    const db: Connection = mysql.createConnection(dbConfig)
-    db.query(
-        "SELECT * FROM user",
-        null,
-        (err, result) => {
-            if (err) {
-                callback(err)
-            }
-            else {
-                const row = (<RowDataPacket[]>result)
-                const users: User[] = row.map((user) => {
-                    return {
-                        name: user.name,
-                        role: user.role,
-                        username: user.username
-                    }
-                })
-                callback(null, baseResp(200, "Get All User Success", users) as GetUsersResp)
-            }
-            db.end()
-        }
-    )
 }

@@ -10,7 +10,7 @@ import DataParser from "./DataParser"
 export const DataRouter = express.Router()
 
 DataRouter.post("/", authenticateJWT, DataParser.none(), async (req: JWTRequest, res: Response) => {
-    DataModel.getData(req, (err: QueryError, resp: BaseResp) => {
+    DataModel.getByCategory(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })

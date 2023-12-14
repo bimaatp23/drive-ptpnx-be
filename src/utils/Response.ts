@@ -54,6 +54,15 @@ export const notFoundResp = (message?: string): BaseResp => {
     }
 }
 
+export const conflictResp = (message?: string): BaseResp => {
+    return {
+        errorSchema: {
+            errorCode: 409,
+            errorMessage: message ?? "Conflict"
+        }
+    }
+}
+
 export const errorResp = (message: string): BaseResp => {
     return {
         errorSchema: {

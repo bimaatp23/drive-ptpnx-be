@@ -11,7 +11,7 @@ import { UploadDataReq } from "../types/data/UploadDataReq"
 import { badRequestResp, baseResp, errorResp, notFoundResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
-export const getData = (req: JWTRequest, callback: Function) => {
+export const getByCategory = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     const getDataReq: GetDatasReq = req.body
     const payload = req.payload

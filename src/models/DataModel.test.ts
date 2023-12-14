@@ -5,7 +5,7 @@ import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
 import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
-import { getData } from "./DataModel"
+import { getByCategory } from "./DataModel"
 
 let mockRequestDefault: Request = {
     app: {} as any,
@@ -179,6 +179,7 @@ describe("getData", () => {
             description: "Test Document",
             file: "example.txt",
             category: "exampleCategory",
+            lockerId: "exampleLockerId",
             author: "exampleUser",
         }
         const mockConnection = {
@@ -193,7 +194,7 @@ describe("getData", () => {
         require("mysql2").createConnection.mockReturnValue(mockConnection)
 
         // Call the function with the mocked request and callback
-        getData(mockRequest, mockCallback)
+        getByCategory(mockRequest, mockCallback)
 
         // Assertions
 
