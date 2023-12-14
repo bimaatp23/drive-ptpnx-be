@@ -9,14 +9,14 @@ import DataParser from "./DataParser"
 
 export const UserRouter = express.Router()
 
-UserRouter.post("/login", DataParser.single("file"), async (req: JWTRequest, res: Response) => {
+UserRouter.post("/login", DataParser.none(), async (req: JWTRequest, res: Response) => {
     UserModel.login(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-UserRouter.post("/change-password", authenticateJWT, DataParser.single("file"), async (req: JWTRequest, res: Response) => {
+UserRouter.post("/change-password", authenticateJWT, DataParser.none(), async (req: JWTRequest, res: Response) => {
     UserModel.changePassword(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)

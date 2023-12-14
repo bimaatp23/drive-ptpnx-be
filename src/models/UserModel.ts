@@ -43,7 +43,7 @@ export const login = (req: JWTRequest, callback: Function) => {
 
 export const changePassword = (req: JWTRequest, callback: Function) => {
     const changePasswordReq: ChangePasswordReq = req.body
-    if (changePasswordReq.newPassword !== changePasswordReq.renewPassword) {
+    if (changePasswordReq.newPassword !== changePasswordReq.confirmPassword) {
         callback(null, badRequestResp("New Passwords Do Not Match"))
     } else {
         const db: Connection = mysql.createConnection(dbConfig)
