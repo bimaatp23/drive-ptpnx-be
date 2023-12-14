@@ -1,7 +1,9 @@
 import { Request } from "express"
 import { IncomingHttpHeaders } from "http"
 import { Socket } from "net"
+import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
+import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
 import { getData } from "./DataModel"
 
@@ -119,7 +121,7 @@ describe("getData", () => {
     const mockRequest: JWTRequest = {
         ...mockRequestDefault,
         body: {
-            category: "",
+            category: "exampleCategory",
             dateFrom: "",
             dateUntil: "",
             documentNumber: "",
@@ -170,19 +172,18 @@ describe("getData", () => {
 
     it("should fetch data from the database and return the expected response", () => {
         // Mock database connection and query result
+        const mockResult: Data = {
+            id: "1",
+            date: "2023-01-01",
+            documentNumber: "doc123",
+            description: "Test Document",
+            file: "example.txt",
+            category: "exampleCategory",
+            author: "exampleUser",
+        }
         const mockConnection = {
             query: jest.fn((query, params, callback) => {
-                const result = [
-                    {
-                        id: 1,
-                        tanggal: "2023-01-01",
-                        no_dokumen: "doc123",
-                        keterangan: "Test Document",
-                        file: "example.txt",
-                        kategori: "exampleCategory",
-                        author: "exampleUser",
-                    },
-                ]
+                const result = [mockResult]
                 callback(null, result)
             }),
             end: jest.fn(),
@@ -197,13 +198,10 @@ describe("getData", () => {
         // Assertions
 
         // Ensure createConnection is called with the correct config
-        expect(require("mysql2").createConnection).toHaveBeenCalledWith({
-            // Provide your mock database configuration here
-        })
+        expect(require("mysql2").createConnection).toHaveBeenCalledWith(dbConfig)
 
         // Ensure query is called with the correct SQL and parameters
-        expect(mockConnection.query).toHaveBeenCalledWith(
-            expect.stringContaining("SELECT * FROM data"),
+        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM data"),
             ["exampleCategory", "exampleUser"],
             expect.any(Function)
         )

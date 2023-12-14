@@ -23,7 +23,7 @@ DataRouter.post("/upload", authenticateJWT, DataParser.single("file"), async (re
     })
 })
 
-DataRouter.get("/:id", async (req: JWTRequest, res: Response) => {
+DataRouter.get("/:id", authenticateJWT, async (req: JWTRequest, res: Response) => {
     DataModel.download(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else if (resp.errorSchema.errorCode === 200) res.download((process.env.SERVER === "production" ? "./dist" : ".") + `/src/uploads/${resp.outputSchema.file}`)

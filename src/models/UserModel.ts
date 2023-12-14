@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken"
 import mysql, { Connection, RowDataPacket } from "mysql2"
 import { dbConfig } from "../../db"
 import { GetUsersResp } from "../../src/types/user/GetUsersResp"
@@ -29,10 +28,9 @@ export const login = (req: JWTRequest, callback: Function) => {
                         username: row.username
                     }
                     callback(null, baseResp(200, "Login Success", {
-                        name: user.name,
-                        role: user.role,
                         username: user.username,
-                        token: jwt.sign(user, process.env.SECRET_KEY as string)
+                        name: user.name,
+                        role: user.role
                     }) as LoginResp)
                 }
             }
