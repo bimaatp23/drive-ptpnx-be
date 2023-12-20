@@ -11,16 +11,17 @@ import { UploadDataReq } from "../types/data/UploadDataReq"
 import { badRequestResp, baseResp, errorResp, notFoundResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
-export const getByCategory = (req: JWTRequest, callback: Function) => {
+export const getDatas = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
+    const db2: Connection = mysql.createConnection(dbConfig)
     const getDataReq: GetDatasReq = req.body
     const payload = req.payload
-    db.query(
+    db2.query(
         `SELECT * FROM data WHERE 
-            category = ? AND 
+            category_id LIKE ? AND 
             author = ?
             ORDER BY date DESC`,
-        [getDataReq.category, payload?.username],
+        [`%${getDataReq.categoryId}%`, payload?.username],
         (err, result) => {
             if (err) callback(err)
             else {
@@ -32,7 +33,7 @@ export const getByCategory = (req: JWTRequest, callback: Function) => {
                         documentNumber: data.document_number,
                         description: data.description,
                         file: data.file,
-                        category: data.category,
+                        categoryId: data.category_id,
                         lockerId: data.locker_id,
                         author: data.author
                     }
@@ -43,7 +44,7 @@ export const getByCategory = (req: JWTRequest, callback: Function) => {
                 }
                 callback(null, baseResp(200, "Get Data List Success", datas) as GetDatasResp)
             }
-            db.end()
+            db2.end()
         }
     )
 }
@@ -56,8 +57,8 @@ export const upload = (req: JWTRequest, callback: Function) => {
     const uuid = generateUUID()
     if (file) {
         db.query(
-            "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.category, uuid + path.extname(file.filename), payload?.username],
+            "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.categoryId, uploadDataReq.lockerId, uuid + path.extname(file.filename), payload?.username],
             (err) => {
                 if (err) {
                     callback(err, errorResp(err.message))

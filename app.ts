@@ -22,8 +22,8 @@ if (!fs.existsSync(filePathTemp)) {
 app.use(BodyParser.json())
 app.use("/user", UserRouter)
 app.use("/data", DataRouter)
-app.use("/locker", LockerRouter)
 app.use("/category", CategoryRouter)
+app.use("/locker", LockerRouter)
 
 app.listen(process.env.PORT, () => {
     console.log("Server is running on port " + process.env.PORT + " " + process.env.SERVER)

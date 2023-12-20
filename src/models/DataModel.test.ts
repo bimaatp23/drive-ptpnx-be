@@ -5,7 +5,7 @@ import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
 import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
-import { getByCategory } from "./DataModel"
+import { getDatas } from "./DataModel"
 
 let mockRequestDefault: Request = {
     app: {} as any,
@@ -194,7 +194,7 @@ describe("getData", () => {
         require("mysql2").createConnection.mockReturnValue(mockConnection)
 
         // Call the function with the mocked request and callback
-        getByCategory(mockRequest, mockCallback)
+        getDatas(mockRequest, mockCallback)
 
         // Assertions
 

@@ -1,5 +1,6 @@
 export interface GetDatasReq {
-    category: string
+    categoryId: string
+    lockerId: string
     dateFrom: string
     dateUntil: string
     documentNumber: string

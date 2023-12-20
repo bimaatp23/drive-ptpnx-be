@@ -4,7 +4,7 @@ export interface Data {
     documentNumber: string
     description: string
     file: string
-    category: string
+    categoryId: string
     lockerId: string
     author: string
 }
