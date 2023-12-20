@@ -3,6 +3,7 @@ import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
 import { Category } from "../types/category/Category"
 import { CreateCategoryReq } from "../types/category/CreateCategoryReq"
+import { DeleteCategoryReq } from "../types/category/DeleteCategoryReq"
 import { GetCategorysResp } from "../types/category/GetCategorysResp"
 import { UpdateCategoryReq } from "../types/category/UpdateCategoryReq"
 import { baseResp, conflictResp } from "../utils/Response"
@@ -83,6 +84,38 @@ export const update = (req: JWTRequest, callback: Function) => {
                             if (err) callback(err)
                             else {
                                 callback(null, baseResp(200, "Update Category Success"))
+                            }
+                            db2.end()
+                        }
+                    )
+                }
+            }
+            db.end()
+        }
+    )
+}
+
+export const remove = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    const deleteCategoryReq: DeleteCategoryReq = req.body
+    db.query(
+        "SELECT * FROM data WHERE category_id = ?",
+        [deleteCategoryReq.id],
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                if (row.length > 0) {
+                    callback(null, conflictResp("Category Already Used"))
+                } else {
+                    const db2: Connection = mysql.createConnection(dbConfig)
+                    db2.query(
+                        "DELETE FROM category WHERE id = ?",
+                        [deleteCategoryReq.id],
+                        (err, result) => {
+                            if (err) callback(err)
+                            else {
+                                callback(null, baseResp(200, "Delete Category Success"))
                             }
                             db2.end()
                         }

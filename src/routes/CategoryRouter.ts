@@ -29,3 +29,10 @@ CategoryRouter.post("/update", DataParser.none(), async (req: JWTRequest, res: R
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
+
+CategoryRouter.post("/delete", DataParser.none(), async (req: JWTRequest, res: Response) => {
+    CategoryModel.remove(req, (err: QueryError, resp: BaseResp) => {
+        if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
+        else res.status(resp.errorSchema.errorCode).json(resp)
+    })
+})
