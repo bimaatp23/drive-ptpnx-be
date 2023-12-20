@@ -9,7 +9,7 @@ import { UpdateLockerReq } from "../types/locker/UpdateLockerReq"
 import { baseResp, conflictResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
-export const getLocker = (req: JWTRequest, callback: Function) => {
+export const getLockers = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     db.query(
         "SELECT * FROM locker ORDER BY name ASC",
