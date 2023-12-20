@@ -79,7 +79,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
-                        "UPDATE locker SET name = ?, capacity = ?  WHERE id = ?",
+                        "UPDATE locker SET name = ?, capacity = ? WHERE id = ?",
                         [updateLockerReq.name, updateLockerReq.capacity, updateLockerReq.id],
                         (err, result) => {
                             if (err) callback(err)

@@ -4,6 +4,7 @@ import { JWTRequest } from "../types/JWTRequest"
 import { Category } from "../types/category/Category"
 import { CreateCategoryReq } from "../types/category/CreateCategoryReq"
 import { GetCategorysResp } from "../types/category/GetCategorysResp"
+import { UpdateCategoryReq } from "../types/category/UpdateCategoryReq"
 import { baseResp, conflictResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
@@ -50,6 +51,38 @@ export const create = (req: JWTRequest, callback: Function) => {
                             if (err) callback(err)
                             else {
                                 callback(null, baseResp(200, "Create Category Success"))
+                            }
+                            db2.end()
+                        }
+                    )
+                }
+            }
+            db.end()
+        }
+    )
+}
+
+export const update = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    const updateCategoryReq: UpdateCategoryReq = req.body
+    db.query(
+        "SELECT * FROM category WHERE name = ? AND id != ?",
+        [updateCategoryReq.name, updateCategoryReq.id],
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                if (row.length > 0) {
+                    callback(null, conflictResp("Category Name Already Exists"))
+                } else {
+                    const db2: Connection = mysql.createConnection(dbConfig)
+                    db2.query(
+                        "UPDATE category SET name = ? WHERE id = ?",
+                        [updateCategoryReq.name, updateCategoryReq.id],
+                        (err, result) => {
+                            if (err) callback(err)
+                            else {
+                                callback(null, baseResp(200, "Update Category Success"))
                             }
                             db2.end()
                         }
