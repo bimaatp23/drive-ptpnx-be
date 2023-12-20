@@ -1,6 +1,6 @@
 import { BaseResp } from "../BaseResp"
 import { Category } from "./Category"
 
-export interface GetCatgeorysResp extends BaseResp {
+export interface GetCategorysResp extends BaseResp {
     outputSchema: Category[]
 }

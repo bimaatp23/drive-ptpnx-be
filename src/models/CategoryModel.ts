@@ -2,8 +2,10 @@ import mysql, { Connection, RowDataPacket } from "mysql2"
 import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
 import { Category } from "../types/category/Category"
-import { GetCatgeorysResp } from "../types/category/GetCategorysResp"
-import { baseResp } from "../utils/Response"
+import { CreateCategoryReq } from "../types/category/CreateCategoryReq"
+import { GetCategorysResp } from "../types/category/GetCategorysResp"
+import { baseResp, conflictResp } from "../utils/Response"
+import { generateUUID } from "../utils/UUID"
 
 export const getCategorys = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
@@ -19,7 +21,40 @@ export const getCategorys = (req: JWTRequest, callback: Function) => {
                         name: data.name
                     }
                 })
-                callback(null, baseResp(200, "Get Category List Success", categorys) as GetCatgeorysResp)
+                callback(null, baseResp(200, "Get Category List Success", categorys) as GetCategorysResp)
+            }
+            db.end()
+        }
+    )
+}
+
+export const create = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    const createCategoryReq: CreateCategoryReq = req.body
+    const uuid = generateUUID()
+    db.query(
+        "SELECT * FROM category WHERE name = ?",
+        [createCategoryReq.name],
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                if (row.length > 0) {
+                    callback(null, conflictResp("Category Name Already Exists"))
+                } else {
+                    const db2: Connection = mysql.createConnection(dbConfig)
+                    db2.query(
+                        "INSERT INTO category VALUES (?, ?)",
+                        [uuid, createCategoryReq.name],
+                        (err, result) => {
+                            if (err) callback(err)
+                            else {
+                                callback(null, baseResp(200, "Create Category Success"))
+                            }
+                            db2.end()
+                        }
+                    )
+                }
             }
             db.end()
         }
