@@ -65,7 +65,10 @@ export const create = (req: JWTRequest, callback: Function) => {
 
 export const update = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
-    const updateCategoryReq: UpdateCategoryReq = req.body
+    const updateCategoryReq: UpdateCategoryReq = {
+        ...req.body,
+        id: req.params.id
+    }
     db.query(
         "SELECT * FROM category WHERE name = ? AND id != ?",
         [updateCategoryReq.name, updateCategoryReq.id],
@@ -97,7 +100,9 @@ export const update = (req: JWTRequest, callback: Function) => {
 
 export const remove = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
-    const deleteCategoryReq: DeleteCategoryReq = req.body
+    const deleteCategoryReq: DeleteCategoryReq = {
+        id: req.params.id
+    }
     db.query(
         "SELECT * FROM data WHERE category_id = ?",
         [deleteCategoryReq.id],

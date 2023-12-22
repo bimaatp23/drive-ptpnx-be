@@ -16,21 +16,21 @@ LockerRouter.get("/", authenticateJWT, async (req: JWTRequest, res: Response) =>
     })
 })
 
-LockerRouter.post("/create", DataParser.none(), async (req: JWTRequest, res: Response) => {
+LockerRouter.post("/", DataParser.none(), async (req: JWTRequest, res: Response) => {
     LockerModel.create(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-LockerRouter.post("/update", DataParser.none(), async (req: JWTRequest, res: Response) => {
+LockerRouter.put("/:id", DataParser.none(), async (req: JWTRequest, res: Response) => {
     LockerModel.update(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-LockerRouter.post("/delete", DataParser.none(), async (req: JWTRequest, res: Response) => {
+LockerRouter.delete("/:id", async (req: JWTRequest, res: Response) => {
     LockerModel.remove(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)

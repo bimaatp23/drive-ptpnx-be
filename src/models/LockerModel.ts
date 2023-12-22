@@ -66,7 +66,10 @@ export const create = (req: JWTRequest, callback: Function) => {
 
 export const update = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
-    const updateLockerReq: UpdateLockerReq = req.body
+    const updateLockerReq: UpdateLockerReq = {
+        ...req.body,
+        id: req.params.id
+    }
     db.query(
         "SELECT * FROM locker WHERE name = ? AND id != ?",
         [updateLockerReq.name, updateLockerReq.id],
@@ -98,7 +101,9 @@ export const update = (req: JWTRequest, callback: Function) => {
 
 export const remove = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
-    const deleteLockerReq: DeleteLockerReq = req.body
+    const deleteLockerReq: DeleteLockerReq = {
+        id: req.params.id
+    }
     db.query(
         "SELECT * FROM data WHERE locker_id = ?",
         [deleteLockerReq.id],

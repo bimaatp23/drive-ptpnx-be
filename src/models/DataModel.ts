@@ -14,7 +14,14 @@ import { generateUUID } from "../utils/UUID"
 export const getDatas = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     const db2: Connection = mysql.createConnection(dbConfig)
-    const getDataReq: GetDatasReq = req.body
+    const getDataReq: GetDatasReq = {
+        categoryId: req.query.categoryId as string ?? "",
+        lockerId: req.query.lockerId as string ?? "",
+        dateFrom: req.query.dateFrom as string ?? "",
+        dateUntil: req.query.dateUntil as string ?? "",
+        documentNumber: req.query.documentNumber as string ?? "",
+        description: req.query.description as string ?? ""
+    }
     const payload = req.payload
     db2.query(
         `SELECT * FROM data WHERE 
