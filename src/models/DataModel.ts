@@ -22,13 +22,25 @@ export const getDatas = (req: JWTRequest, callback: Function) => {
         documentNumber: req.query.documentNumber as string ?? "",
         description: req.query.description as string ?? ""
     }
+    console.log(getDataReq)
     const payload = req.payload
     db2.query(
         `SELECT * FROM data WHERE 
             category_id LIKE ? AND 
+            locker_id LIKE ? AND 
+        ${getDataReq.dateFrom === "" ?
+            `date <= "${getDataReq.dateUntil}"`
+            :
+            getDataReq.dateUntil === "" ?
+                `date >= "${getDataReq.dateFrom}"`
+                :
+                `date BETWEEN "${getDataReq.dateFrom}" AND "${getDataReq.dateUntil}"`
+        } AND
+            document_number LIKE ? AND 
+            description LIKE ? AND 
             author = ?
             ORDER BY date DESC`,
-        [`%${getDataReq.categoryId}%`, payload?.username],
+        [`%${getDataReq.categoryId}%`, `%${getDataReq.lockerId}%`, `%${getDataReq.documentNumber}%`, `%${getDataReq.description}%`, payload?.username],
         (err, result) => {
             if (err) callback(err)
             else {
