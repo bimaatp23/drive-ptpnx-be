@@ -22,7 +22,6 @@ export const getDatas = (req: JWTRequest, callback: Function) => {
         documentNumber: req.query.documentNumber as string ?? "",
         description: req.query.description as string ?? ""
     }
-    console.log(getDataReq)
     const payload = req.payload
     db2.query(
         `SELECT * FROM data WHERE 
