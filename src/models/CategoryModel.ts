@@ -3,7 +3,7 @@ import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
 import { CreateCategoryReq } from "../types/category/CreateCategoryReq"
 import { DeleteCategoryReq } from "../types/category/DeleteCategoryReq"
-import { GetCategorys, GetCategorysResp } from "../types/category/GetCategorysResp"
+import { GetCategory, GetCategorysResp } from "../types/category/GetCategorysResp"
 import { UpdateCategoryReq } from "../types/category/UpdateCategoryReq"
 import { baseResp, conflictResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
@@ -27,7 +27,7 @@ export const getCategorys = (req: JWTRequest, callback: Function) => {
             if (err) callback(err)
             else {
                 const row = (<RowDataPacket[]>result)
-                let categorys: GetCategorys[] = row.map((data) => {
+                let categorys: GetCategory[] = row.map((data) => {
                     return {
                         id: data.category_id,
                         name: data.category_name,

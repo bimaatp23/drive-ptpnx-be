@@ -3,8 +3,7 @@ import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
 import { CreateLockerReq } from "../types/locker/CreateLockerReq"
 import { DeleteLockerReq } from "../types/locker/DeleteLockerReq"
-import { GetLockersResp } from "../types/locker/GetLockersResp"
-import { Locker } from "../types/locker/Locker"
+import { GetLocker, GetLockersResp } from "../types/locker/GetLockersResp"
 import { UpdateLockerReq } from "../types/locker/UpdateLockerReq"
 import { baseResp, conflictResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
@@ -12,16 +11,29 @@ import { generateUUID } from "../utils/UUID"
 export const getLockers = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     db.query(
-        "SELECT * FROM locker ORDER BY name ASC",
+        `SELECT
+            l.id AS locker_id,
+            l.name AS locker_name,
+            l.capacity,
+            COUNT(d.id) AS usage_count
+        FROM
+            locker l
+        LEFT JOIN
+            data d ON l.id = d.locker_id
+        GROUP BY
+            l.id, l.name, l.capacity
+        ORDER BY
+            locker_name ASC`,
         (err, result) => {
             if (err) callback(err)
             else {
                 const row = (<RowDataPacket[]>result)
-                let lockers: Locker[] = row.map((data) => {
+                let lockers: GetLocker[] = row.map((data) => {
                     return {
-                        id: data.id,
-                        name: data.name,
-                        capacity: data.capacity
+                        id: data.locker_id,
+                        name: data.locker_name,
+                        capacity: data.capacity,
+                        usageCount: data.usage_count
                     }
                 })
                 callback(null, baseResp(200, "Get Locker List Success", lockers) as GetLockersResp)
@@ -71,23 +83,39 @@ export const update = (req: JWTRequest, callback: Function) => {
         id: req.params.id
     }
     db.query(
-        "SELECT * FROM locker WHERE name = ? AND id != ?",
-        [updateLockerReq.name, updateLockerReq.id],
+        "SELECT * FROM data WHERE locker_id = ?",
+        [updateLockerReq.id],
         (err, result) => {
             if (err) callback(err)
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Locker Name Already Exists"))
+                    callback(null, conflictResp("Locker Already Used"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
-                        "UPDATE locker SET name = ?, capacity = ? WHERE id = ?",
-                        [updateLockerReq.name, updateLockerReq.capacity, updateLockerReq.id],
+                        "SELECT * FROM locker WHERE name = ? AND id != ?",
+                        [updateLockerReq.name, updateLockerReq.id],
                         (err, result) => {
                             if (err) callback(err)
                             else {
-                                callback(null, baseResp(200, "Update Locker Success"))
+                                const row = (<RowDataPacket[]>result)
+                                if (row.length > 0) {
+                                    callback(null, conflictResp("Locker Name Already Exists"))
+                                } else {
+                                    const db3: Connection = mysql.createConnection(dbConfig)
+                                    db3.query(
+                                        "UPDATE locker SET name = ?, capacity = ? WHERE id = ?",
+                                        [updateLockerReq.name, updateLockerReq.capacity, updateLockerReq.id],
+                                        (err, result) => {
+                                            if (err) callback(err)
+                                            else {
+                                                callback(null, baseResp(200, "Update Locker Success"))
+                                            }
+                                            db3.end()
+                                        }
+                                    )
+                                }
                             }
                             db2.end()
                         }

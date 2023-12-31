@@ -2,9 +2,9 @@ import { BaseResp } from "../BaseResp"
 import { Category } from "./Category"
 
 export interface GetCategorysResp extends BaseResp {
-    outputSchema: GetCategorys[]
+    outputSchema: GetCategory[]
 }
 
-export interface GetCategorys extends Category {
+export interface GetCategory extends Category {
     usageCount: number
 }
