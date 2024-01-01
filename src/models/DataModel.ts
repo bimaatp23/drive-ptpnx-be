@@ -5,6 +5,7 @@ import { dbConfig } from "../../db"
 import { BaseResp } from "../types/BaseResp"
 import { JWTRequest } from "../types/JWTRequest"
 import { Data } from "../types/data/Data"
+import { DeleteDataReq } from "../types/data/DeleteDataReq"
 import { GetDatasReq } from "../types/data/GetDatasReq"
 import { GetDatasResp } from "../types/data/GetDatasResp"
 import { UpdateDataReq } from "../types/data/UpdateDataReq"
@@ -168,6 +169,38 @@ export const update = (req: JWTRequest, callback: Function) => {
             if (err) callback(err)
             else {
                 callback(null, baseResp(200, "Update Locker Success"))
+            }
+            db.end()
+        }
+    )
+}
+
+export const remove = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    const deleteDataReq: DeleteDataReq = {
+        id: req.params.id
+    }
+    db.query(
+        "SELECT * FROM data WHERE id = ?",
+        [deleteDataReq.id],
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                const db2: Connection = mysql.createConnection(dbConfig)
+                db2.query(
+                    "DELETE FROM data WHERE id = ?",
+                    [deleteDataReq.id],
+                    (err) => {
+                        if (err) callback(err)
+                        else {
+                            const filePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", row[0].file)
+                            fs.unlinkSync(filePath)
+                            callback(null, baseResp(200, "Delete Data Success"))
+                        }
+                        db2.end()
+                    }
+                )
             }
             db.end()
         }
