@@ -8,7 +8,8 @@ import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
 import { GetDatasResp } from "../types/data/GetDatasResp"
 import { UploadDataReq } from "../types/data/UploadDataReq"
-import { badRequestResp, baseResp, errorResp, notFoundResp } from "../utils/Response"
+import { GetLocker } from "../types/locker/GetLockersResp"
+import { badRequestResp, baseResp, conflictResp, errorResp, notFoundResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
 export const getDatas = (req: JWTRequest, callback: Function) => {
@@ -73,25 +74,61 @@ export const upload = (req: JWTRequest, callback: Function) => {
     const payload = req.payload
     const file = req.file
     const uuid = generateUUID()
-    if (file) {
-        db.query(
-            "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.categoryId, uploadDataReq.lockerId, uuid + path.extname(file.filename), payload?.username],
-            (err) => {
-                if (err) {
-                    callback(err, errorResp(err.message))
+    db.query(
+        `SELECT
+            l.id AS locker_id,
+            l.name AS locker_name,
+            l.capacity,
+            COUNT(d.id) AS usage_count
+        FROM
+            locker l
+        LEFT JOIN
+            data d ON l.id = d.locker_id
+        GROUP BY
+            l.id, l.name, l.capacity
+        ORDER BY
+            locker_name ASC`,
+        (err, result) => {
+            if (err) callback(err)
+            else {
+                const row = (<RowDataPacket[]>result)
+                let lockers: GetLocker[] = row.map((data) => {
+                    return {
+                        id: data.locker_id,
+                        name: data.locker_name,
+                        capacity: data.capacity,
+                        usageCount: data.usage_count
+                    }
+                })
+                lockers = lockers.filter((data) => data.id === uploadDataReq.lockerId)
+                if (lockers[0].capacity - lockers[0].usageCount === 0) {
+                    callback(null, conflictResp("Locker Capacity is Full"))
                 } else {
-                    const sourcePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", file.filename)
-                    const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", uuid + path.extname(file.filename))
-                    fs.renameSync(sourcePath, destinationPath)
-                    callback(null, baseResp(200, "Upload Data Success"))
+                    const db2: Connection = mysql.createConnection(dbConfig)
+                    if (file) {
+                        db2.query(
+                            "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.categoryId, uploadDataReq.lockerId, uuid + path.extname(file.filename), payload?.username],
+                            (err) => {
+                                if (err) {
+                                    callback(err, errorResp(err.message))
+                                } else {
+                                    const sourcePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", file.filename)
+                                    const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", uuid + path.extname(file.filename))
+                                    fs.renameSync(sourcePath, destinationPath)
+                                    callback(null, baseResp(200, "Upload Data Success"))
+                                }
+                                db2.end()
+                            }
+                        )
+                    } else {
+                        callback(null, badRequestResp())
+                    }
                 }
-                db.end()
             }
-        )
-    } else {
-        callback(null, badRequestResp())
-    }
+            db.end()
+        }
+    )
 }
 
 export const download = (req: JWTRequest, callback: Function) => {
