@@ -7,6 +7,7 @@ import { JWTRequest } from "../types/JWTRequest"
 import { Data } from "../types/data/Data"
 import { GetDatasReq } from "../types/data/GetDatasReq"
 import { GetDatasResp } from "../types/data/GetDatasResp"
+import { UpdateDataReq } from "../types/data/UpdateDataReq"
 import { UploadDataReq } from "../types/data/UploadDataReq"
 import { GetLocker } from "../types/locker/GetLockersResp"
 import { badRequestResp, baseResp, conflictResp, errorResp, notFoundResp } from "../utils/Response"
@@ -148,6 +149,25 @@ export const download = (req: JWTRequest, callback: Function) => {
                         file: row[0].file
                     }) as BaseResp)
                 }
+            }
+            db.end()
+        }
+    )
+}
+
+export const update = (req: JWTRequest, callback: Function) => {
+    const db: Connection = mysql.createConnection(dbConfig)
+    const updateDataReq: UpdateDataReq = {
+        ...req.body,
+        id: req.params.id
+    }
+    db.query(
+        "UPDATE data SET date = ?, document_number = ?, description = ? WHERE id = ?",
+        [updateDataReq.date, updateDataReq.documentNumber, updateDataReq.description, updateDataReq.id],
+        (err) => {
+            if (err) callback(err)
+            else {
+                callback(null, baseResp(200, "Update Locker Success"))
             }
             db.end()
         }

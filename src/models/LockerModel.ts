@@ -107,7 +107,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                                     db3.query(
                                         "UPDATE locker SET name = ?, capacity = ? WHERE id = ?",
                                         [updateLockerReq.name, updateLockerReq.capacity, updateLockerReq.id],
-                                        (err, result) => {
+                                        (err) => {
                                             if (err) callback(err)
                                             else {
                                                 callback(null, baseResp(200, "Update Locker Success"))
@@ -146,7 +146,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
                     db2.query(
                         "DELETE FROM locker WHERE id = ?",
                         [deleteLockerReq.id],
-                        (err, result) => {
+                        (err) => {
                             if (err) callback(err)
                             else {
                                 callback(null, baseResp(200, "Delete Locker Success"))

@@ -81,7 +81,7 @@ export const changePassword = (req: JWTRequest, callback: Function) => {
                         db2.query(
                             "UPDATE user SET password = ? WHERE username = ?",
                             [changePasswordReq.newPassword, req.payload?.username],
-                            (err, result) => {
+                            (err) => {
                                 if (err) {
                                     callback(err)
                                 } else {

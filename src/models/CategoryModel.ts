@@ -105,7 +105,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                                     db3.query(
                                         "UPDATE category SET name = ? WHERE id = ?",
                                         [updateCategoryReq.name, updateCategoryReq.id],
-                                        (err, result) => {
+                                        (err) => {
                                             if (err) callback(err)
                                             else {
                                                 callback(null, baseResp(200, "Update Category Success"))
@@ -144,7 +144,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
                     db2.query(
                         "DELETE FROM category WHERE id = ?",
                         [deleteCategoryReq.id],
-                        (err, result) => {
+                        (err) => {
                             if (err) callback(err)
                             else {
                                 callback(null, baseResp(200, "Delete Category Success"))
