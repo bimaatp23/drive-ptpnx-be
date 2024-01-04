@@ -9,7 +9,7 @@ export const authenticateJWT = (req: JWTRequest, res: Response, next: NextFuncti
     return res.status(401).json({
       errorSchema: {
         errorCode: 401,
-        errorMessage: "Authentication failed"
+        errorMessage: "Authentication Failed"
       }
     } as BaseResp)
   }
@@ -19,7 +19,7 @@ export const authenticateJWT = (req: JWTRequest, res: Response, next: NextFuncti
       return res.status(403).json({
         errorSchema: {
           errorCode: 403,
-          errorMessage: "Invalid token"
+          errorMessage: "Invalid Token"
         }
       } as BaseResp)
     }

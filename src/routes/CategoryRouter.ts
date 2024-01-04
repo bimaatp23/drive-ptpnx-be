@@ -16,21 +16,21 @@ CategoryRouter.get("/", authenticateJWT, async (req: JWTRequest, res: Response) 
     })
 })
 
-CategoryRouter.post("/", DataParser.none(), async (req: JWTRequest, res: Response) => {
+CategoryRouter.post("/", authenticateJWT, DataParser.none(), async (req: JWTRequest, res: Response) => {
     CategoryModel.create(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-CategoryRouter.put("/:id", DataParser.none(), async (req: JWTRequest, res: Response) => {
+CategoryRouter.put("/:id", authenticateJWT, DataParser.none(), async (req: JWTRequest, res: Response) => {
     CategoryModel.update(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-CategoryRouter.delete("/:id", async (req: JWTRequest, res: Response) => {
+CategoryRouter.delete("/:id", authenticateJWT, async (req: JWTRequest, res: Response) => {
     CategoryModel.remove(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)

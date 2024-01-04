@@ -6,6 +6,7 @@ import * as fs from "fs"
 import path from "path"
 import { CategoryRouter } from "./src/routes/CategoryRouter"
 import { DataRouter } from "./src/routes/DataRouter"
+import { EmployeeRouter } from "./src/routes/EmployeeRouter"
 import { LockerRouter } from "./src/routes/LockerRouter"
 import { UserRouter } from "./src/routes/UserRouter"
 
@@ -24,6 +25,7 @@ app.use("/user", UserRouter)
 app.use("/data", DataRouter)
 app.use("/category", CategoryRouter)
 app.use("/locker", LockerRouter)
+app.use("/employee", EmployeeRouter)
 
 app.listen(process.env.PORT, () => {
     console.log("Server is running on port " + process.env.PORT + " " + process.env.SERVER)

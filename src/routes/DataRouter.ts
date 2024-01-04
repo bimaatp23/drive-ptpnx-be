@@ -31,14 +31,14 @@ DataRouter.get("/:id", authenticateJWT, async (req: JWTRequest, res: Response) =
     })
 })
 
-DataRouter.put("/:id", DataParser.none(), async (req: JWTRequest, res: Response) => {
+DataRouter.put("/:id", authenticateJWT, DataParser.none(), async (req: JWTRequest, res: Response) => {
     DataModel.update(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
     })
 })
 
-DataRouter.delete("/:id", async (req: JWTRequest, res: Response) => {
+DataRouter.delete("/:id", authenticateJWT, async (req: JWTRequest, res: Response) => {
     DataModel.remove(req, (err: QueryError, resp: BaseResp) => {
         if (err) return res.status(errorResp(err.message).errorSchema.errorCode).json(errorResp(err.message))
         else res.status(resp.errorSchema.errorCode).json(resp)
