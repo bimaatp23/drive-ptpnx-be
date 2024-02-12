@@ -6,7 +6,7 @@ import { DeleteEmployeeReq } from "../types/employee/DeleteEmployeeReq"
 import { Employee } from "../types/employee/Employee"
 import { GetEmployeesResp } from "../types/employee/GetEmployeesResp"
 import { UpdateEmployeeReq } from "../types/employee/UpdateEmployeeReq"
-import { baseResp } from "../utils/Response"
+import { baseResp, conflictResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
 export const getEmployees = (req: JWTRequest, callback: Function) => {
@@ -23,7 +23,7 @@ export const getEmployees = (req: JWTRequest, callback: Function) => {
                         contact: data.contact
                     }
                 })
-                callback(null, baseResp(200, "Get Employee List Success", employees) as GetEmployeesResp)
+                callback(null, baseResp(200, "Berhasil Mendapatkan List Karyawan", employees) as GetEmployeesResp)
             }
             db.end()
         }
@@ -40,7 +40,7 @@ export const create = (req: JWTRequest, callback: Function) => {
         (err, result) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Create Employee Success"))
+                callback(null, baseResp(200, "Berhasil Menambah Karyawan"))
             }
             db.end()
         }
@@ -54,12 +54,44 @@ export const update = (req: JWTRequest, callback: Function) => {
         id: req.params.id
     }
     db.query(
-        "UPDATE employee SET name = ?, contact = ? WHERE id = ?",
-        [updateEmployeeReq.name, updateEmployeeReq.contact, updateEmployeeReq.id],
-        (err) => {
+        "SELECT * FROM loan WHERE employee_id = ?",
+        [updateEmployeeReq.id],
+        (err, result) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Update Employee Success"))
+                const row = (<RowDataPacket[]>result)
+                if (row.length > 0) {
+                    callback(null, conflictResp("Karyawan Sedang Meminjam Dokumen"))
+                } else {
+                    const db2: Connection = mysql.createConnection(dbConfig)
+                    db2.query(
+                        "SELECT * FROM employee WHERE name = ? AND id != ?",
+                        [updateEmployeeReq.name, updateEmployeeReq.id],
+                        (err, result) => {
+                            if (err) callback(err)
+                            else {
+                                const row = (<RowDataPacket[]>result)
+                                if (row.length > 0) {
+                                    callback(null, conflictResp("Nama Karyawan Sudah Digunakan"))
+                                } else {
+                                    const db3: Connection = mysql.createConnection(dbConfig)
+                                    db3.query(
+                                        "UPDATE employee SET name = ?, contact = ? WHERE id = ?",
+                                        [updateEmployeeReq.name, updateEmployeeReq.contact, updateEmployeeReq.id],
+                                        (err) => {
+                                            if (err) callback(err)
+                                            else {
+                                                callback(null, baseResp(200, "Berhasil Mengedit Karyawan"))
+                                            }
+                                            db3.end()
+                                        }
+                                    )
+                                }
+                            }
+                            db2.end()
+                        }
+                    )
+                }
             }
             db.end()
         }
@@ -68,16 +100,35 @@ export const update = (req: JWTRequest, callback: Function) => {
 
 export const remove = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
-    const deleteEmployeeReq: DeleteEmployeeReq = {
+    const deleteDataReq: DeleteEmployeeReq = {
         id: req.params.id
     }
     db.query(
-        "DELETE FROM employee WHERE id = ?",
-        [deleteEmployeeReq.id],
-        (err) => {
+        "SELECT * FROM loan WHERE employee_id = ?",
+        [deleteDataReq.id],
+        (err, result) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Delete Employee Success"))
+                const row = (<RowDataPacket[]>result)
+                if (row.length > 0) {
+                    callback(null, conflictResp("Karyawan Sedang Meminjam Dokumen"))
+                } else {
+                    const db2: Connection = mysql.createConnection(dbConfig)
+                    const deleteEmployeeReq: DeleteEmployeeReq = {
+                        id: req.params.id
+                    }
+                    db2.query(
+                        "DELETE FROM employee WHERE id = ?",
+                        [deleteEmployeeReq.id],
+                        (err) => {
+                            if (err) callback(err)
+                            else {
+                                callback(null, baseResp(200, "Berhasil Menghapus Karyawan"))
+                            }
+                            db2.end()
+                        }
+                    )
+                }
             }
             db.end()
         }

@@ -18,7 +18,7 @@ export const getLoans = (req: JWTRequest, callback: Function) => {
             if (err) callback(err)
             else {
                 const row = (<RowDataPacket[]>result)
-                let lockers: Loan[] = row.map((data) => {
+                let loans: Loan[] = row.map((data) => {
                     return {
                         id: data.id,
                         dataId: data.data_id,
@@ -29,7 +29,7 @@ export const getLoans = (req: JWTRequest, callback: Function) => {
                         reminder: data.reminder
                     }
                 })
-                callback(null, baseResp(200, "Get Loan List Success", lockers) as GetLoansResp)
+                callback(null, baseResp(200, "Berhasil Mendapatkan List Peminjaman", loans) as GetLoansResp)
             }
             db.end()
         }
@@ -49,7 +49,7 @@ export const create = (req: JWTRequest, callback: Function) => {
         (err, result) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Create Loan Success"))
+                callback(null, baseResp(200, "Berhasil Menambah Peminjaman"))
             }
             db.end()
         }
@@ -70,7 +70,7 @@ export const update = (req: JWTRequest, callback: Function) => {
         (err) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Update Loan Success"))
+                callback(null, baseResp(200, "Berhasil Mengedit Peminjaman"))
             }
             db.end()
         }
@@ -88,7 +88,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
         (err) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Delete Loan Success"))
+                callback(null, baseResp(200, "Berhasil Menghapus Peminjaman"))
             }
             db.end()
         }

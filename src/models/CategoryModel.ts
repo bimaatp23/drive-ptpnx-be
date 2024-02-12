@@ -34,7 +34,7 @@ export const getCategorys = (req: JWTRequest, callback: Function) => {
                         usageCount: data.usage_count
                     }
                 })
-                callback(null, baseResp(200, "Get Category List Success", categorys) as GetCategorysResp)
+                callback(null, baseResp(200, "Berhasil Mendapatkan List Kategori", categorys) as GetCategorysResp)
             }
             db.end()
         }
@@ -53,7 +53,7 @@ export const create = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Category Name Already Exists"))
+                    callback(null, conflictResp("Nama Kategori Sudah Digunakan"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
@@ -62,7 +62,7 @@ export const create = (req: JWTRequest, callback: Function) => {
                         (err, result) => {
                             if (err) callback(err)
                             else {
-                                callback(null, baseResp(200, "Create Category Success"))
+                                callback(null, baseResp(200, "Berhasil Menambah Kategori"))
                             }
                             db2.end()
                         }
@@ -88,7 +88,7 @@ export const update = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Category Already Used"))
+                    callback(null, conflictResp("Kategori Sedang Digunakan"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
@@ -99,7 +99,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                             else {
                                 const row = (<RowDataPacket[]>result)
                                 if (row.length > 0) {
-                                    callback(null, conflictResp("Category Name Already Exists"))
+                                    callback(null, conflictResp("Nama Kategori Sudah Digunakan"))
                                 } else {
                                     const db3: Connection = mysql.createConnection(dbConfig)
                                     db3.query(
@@ -108,7 +108,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                                         (err) => {
                                             if (err) callback(err)
                                             else {
-                                                callback(null, baseResp(200, "Update Category Success"))
+                                                callback(null, baseResp(200, "Berhasil Mengedit Kategori"))
                                             }
                                             db3.end()
                                         }
@@ -138,7 +138,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Category Already Used"))
+                    callback(null, conflictResp("Kategori Sedang Digunakan"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
@@ -147,7 +147,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
                         (err) => {
                             if (err) callback(err)
                             else {
-                                callback(null, baseResp(200, "Delete Category Success"))
+                                callback(null, baseResp(200, "Berhasil Menghapus Kategori"))
                             }
                             db2.end()
                         }

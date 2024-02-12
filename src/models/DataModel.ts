@@ -63,7 +63,7 @@ export const getDatas = (req: JWTRequest, callback: Function) => {
                     datas = datas.filter((data) => data.documentNumber?.toLowerCase().includes(getDataReq.documentNumber))
                     datas = datas.filter((data) => data.description?.toLowerCase().includes(getDataReq.description))
                 }
-                callback(null, baseResp(200, "Get Data List Success", datas) as GetDatasResp)
+                callback(null, baseResp(200, "Berhasil Mendapatkan List Data", datas) as GetDatasResp)
             }
             db2.end()
         }
@@ -104,7 +104,7 @@ export const upload = (req: JWTRequest, callback: Function) => {
                 })
                 lockers = lockers.filter((data) => data.id === uploadDataReq.lockerId)
                 if (lockers[0].capacity - lockers[0].usageCount === 0) {
-                    callback(null, conflictResp("Locker Capacity is Full"))
+                    callback(null, conflictResp("Kapasitas Loker Penuh"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     if (file) {
@@ -118,7 +118,7 @@ export const upload = (req: JWTRequest, callback: Function) => {
                                     const sourcePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", file.filename)
                                     const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", uuid + path.extname(file.filename))
                                     fs.renameSync(sourcePath, destinationPath)
-                                    callback(null, baseResp(200, "Upload Data Success"))
+                                    callback(null, baseResp(200, "Berhasil Menambah Data"))
                                 }
                                 db2.end()
                             }
@@ -144,9 +144,9 @@ export const download = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length === 0) {
-                    callback(null, notFoundResp("File Not Found"))
+                    callback(null, notFoundResp("File Tidak Ditemukan"))
                 } else {
-                    callback(null, baseResp(200, "Download Data Success", {
+                    callback(null, baseResp(200, "Berhasil Mengunduh Data", {
                         file: row[0].file
                     }) as BaseResp)
                 }
@@ -168,7 +168,7 @@ export const update = (req: JWTRequest, callback: Function) => {
         (err) => {
             if (err) callback(err)
             else {
-                callback(null, baseResp(200, "Update Locker Success"))
+                callback(null, baseResp(200, "Berhasil Mengedit Data"))
             }
             db.end()
         }
@@ -189,14 +189,30 @@ export const remove = (req: JWTRequest, callback: Function) => {
                 const row = (<RowDataPacket[]>result)
                 const db2: Connection = mysql.createConnection(dbConfig)
                 db2.query(
-                    "DELETE FROM data WHERE id = ?",
+                    "SELECT * FROM loan WHERE data_id = ?",
                     [deleteDataReq.id],
                     (err) => {
                         if (err) callback(err)
                         else {
-                            const filePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", row[0].file)
-                            fs.unlinkSync(filePath)
-                            callback(null, baseResp(200, "Delete Data Success"))
+                            const row2 = (<RowDataPacket[]>result)
+                            if (row2.length > 0) {
+                                callback(null, conflictResp("Data Sedang Digunakan"))
+                            } else {
+                                const db3: Connection = mysql.createConnection(dbConfig)
+                                db3.query(
+                                    "DELETE FROM data WHERE id = ?",
+                                    [deleteDataReq.id],
+                                    (err) => {
+                                        if (err) callback(err)
+                                        else {
+                                            const filePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", row[0].file)
+                                            fs.unlinkSync(filePath)
+                                            callback(null, baseResp(200, "Berhasil Menghapus Data"))
+                                        }
+                                        db3.end()
+                                    }
+                                )
+                            }
                         }
                         db2.end()
                     }

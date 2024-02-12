@@ -36,7 +36,7 @@ export const getLockers = (req: JWTRequest, callback: Function) => {
                         usageCount: data.usage_count
                     }
                 })
-                callback(null, baseResp(200, "Get Locker List Success", lockers) as GetLockersResp)
+                callback(null, baseResp(200, "Berhasil Mendapatkan List Loker", lockers) as GetLockersResp)
             }
             db.end()
         }
@@ -55,7 +55,7 @@ export const create = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Locker Name Already Exists"))
+                    callback(null, conflictResp("Nama Loker Sudah Digunakan"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
@@ -64,7 +64,7 @@ export const create = (req: JWTRequest, callback: Function) => {
                         (err, result) => {
                             if (err) callback(err)
                             else {
-                                callback(null, baseResp(200, "Create Locker Success"))
+                                callback(null, baseResp(200, "Berhasil Menambah Loker"))
                             }
                             db2.end()
                         }
@@ -90,7 +90,7 @@ export const update = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Locker Already Used"))
+                    callback(null, conflictResp("Loker Sedang Digunakan"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
@@ -101,7 +101,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                             else {
                                 const row = (<RowDataPacket[]>result)
                                 if (row.length > 0) {
-                                    callback(null, conflictResp("Locker Name Already Exists"))
+                                    callback(null, conflictResp("Nama Loker Sudah Digunakan"))
                                 } else {
                                     const db3: Connection = mysql.createConnection(dbConfig)
                                     db3.query(
@@ -110,7 +110,7 @@ export const update = (req: JWTRequest, callback: Function) => {
                                         (err) => {
                                             if (err) callback(err)
                                             else {
-                                                callback(null, baseResp(200, "Update Locker Success"))
+                                                callback(null, baseResp(200, "Berhasil Mengedit Loker"))
                                             }
                                             db3.end()
                                         }
@@ -140,7 +140,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket[]>result)
                 if (row.length > 0) {
-                    callback(null, conflictResp("Locker Already Used"))
+                    callback(null, conflictResp("Loker Sedang Digunakan"))
                 } else {
                     const db2: Connection = mysql.createConnection(dbConfig)
                     db2.query(
@@ -149,7 +149,7 @@ export const remove = (req: JWTRequest, callback: Function) => {
                         (err) => {
                             if (err) callback(err)
                             else {
-                                callback(null, baseResp(200, "Delete Locker Success"))
+                                callback(null, baseResp(200, "Berhasil Menghapus Loker"))
                             }
                             db2.end()
                         }

@@ -24,7 +24,7 @@ export const getUsers = (req: JWTRequest, callback: Function) => {
                         username: user.username
                     }
                 })
-                callback(null, baseResp(200, "Get All User Success", users) as GetUsersResp)
+                callback(null, baseResp(200, "Berhasil Mendapatkan List Pengguna", users) as GetUsersResp)
             }
             db.end()
         }
@@ -42,14 +42,14 @@ export const login = (req: JWTRequest, callback: Function) => {
             else {
                 const row = (<RowDataPacket>result)[0]
                 if (!row) {
-                    callback(null, unauthorizedResp("Incorrect Username or Password"))
+                    callback(null, unauthorizedResp("Username / Password Salah"))
                 } else {
                     const user: User = {
                         name: row.name,
                         role: row.role,
                         username: row.username
                     }
-                    callback(null, baseResp(200, "Login Success", {
+                    callback(null, baseResp(200, "Berhasil Masuk", {
                         username: user.username,
                         name: user.name,
                         role: user.role
@@ -64,7 +64,7 @@ export const login = (req: JWTRequest, callback: Function) => {
 export const changePassword = (req: JWTRequest, callback: Function) => {
     const changePasswordReq: ChangePasswordReq = req.body
     if (changePasswordReq.newPassword !== changePasswordReq.confirmPassword) {
-        callback(null, badRequestResp("New Passwords Do Not Match"))
+        callback(null, badRequestResp("Password Baru Tidak Sama"))
     } else {
         const db: Connection = mysql.createConnection(dbConfig)
         db.query(
@@ -75,7 +75,7 @@ export const changePassword = (req: JWTRequest, callback: Function) => {
                 else {
                     const row = (<RowDataPacket>result)[0]
                     if (!row) {
-                        callback(null, unauthorizedResp("Old Password Is Wrong"))
+                        callback(null, unauthorizedResp("Password Lama Salah"))
                     } else {
                         const db2: Connection = mysql.createConnection(dbConfig)
                         db2.query(
@@ -85,7 +85,7 @@ export const changePassword = (req: JWTRequest, callback: Function) => {
                                 if (err) {
                                     callback(err)
                                 } else {
-                                    callback(null, baseResp(200, "Change Password Success"))
+                                    callback(null, baseResp(200, "Berhasil Mengganti Password"))
                                 }
                             }
                         )
