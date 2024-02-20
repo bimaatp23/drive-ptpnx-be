@@ -10,13 +10,11 @@ import { GetDatasReq } from "../types/data/GetDatasReq"
 import { GetDatasResp } from "../types/data/GetDatasResp"
 import { UpdateDataReq } from "../types/data/UpdateDataReq"
 import { UploadDataReq } from "../types/data/UploadDataReq"
-import { GetLocker } from "../types/locker/GetLockersResp"
-import { badRequestResp, baseResp, conflictResp, errorResp, notFoundResp } from "../utils/Response"
+import { badRequestResp, baseResp, errorResp, notFoundResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
 export const getDatas = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
-    const db2: Connection = mysql.createConnection(dbConfig)
     const getDataReq: GetDatasReq = {
         categoryId: req.query.categoryId as string ?? "",
         lockerId: req.query.lockerId as string ?? "",
@@ -26,7 +24,7 @@ export const getDatas = (req: JWTRequest, callback: Function) => {
         description: req.query.description as string ?? ""
     }
     const payload = req.payload
-    db2.query(
+    db.query(
         `SELECT * FROM data WHERE 
             category_id LIKE ? AND 
             locker_id LIKE ? AND 
@@ -65,7 +63,7 @@ export const getDatas = (req: JWTRequest, callback: Function) => {
                 }
                 callback(null, baseResp(200, "Berhasil Mendapatkan List Data", datas) as GetDatasResp)
             }
-            db2.end()
+            db.end()
         }
     )
 }
@@ -75,62 +73,28 @@ export const upload = (req: JWTRequest, callback: Function) => {
     const uploadDataReq: UploadDataReq = req.body
     const payload = req.payload
     const file = req.file
-    const uuid = generateUUID()
-    db.query(
-        `SELECT
-            l.id AS locker_id,
-            l.name AS locker_name,
-            l.capacity,
-            COUNT(d.id) AS usage_count
-        FROM
-            locker l
-        LEFT JOIN
-            data d ON l.id = d.locker_id
-        GROUP BY
-            l.id, l.name, l.capacity
-        ORDER BY
-            locker_name ASC`,
-        (err, result) => {
-            if (err) callback(err)
-            else {
-                const row = (<RowDataPacket[]>result)
-                let lockers: GetLocker[] = row.map((data) => {
-                    return {
-                        id: data.locker_id,
-                        name: data.locker_name,
-                        capacity: data.capacity,
-                        usageCount: data.usage_count
-                    }
-                })
-                lockers = lockers.filter((data) => data.id === uploadDataReq.lockerId)
-                if (lockers[0].capacity - lockers[0].usageCount === 0) {
-                    callback(null, conflictResp("Kapasitas Loker Penuh"))
+    const uuid = req.body.uuid ?? generateUUID()
+    if (file) {
+        db.query(
+            "INSERT INTO data VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.categoryId, uploadDataReq.lockerId, uuid + path.extname(file.filename), payload?.username],
+            (err) => {
+                if (err) {
+                    callback(err, errorResp(err.message))
                 } else {
-                    const db2: Connection = mysql.createConnection(dbConfig)
-                    if (file) {
-                        db2.query(
-                            "INSERT INTO `data` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                            [uuid, uploadDataReq.date, uploadDataReq.documentNumber, uploadDataReq.description, uploadDataReq.categoryId, uploadDataReq.lockerId, uuid + path.extname(file.filename), payload?.username],
-                            (err) => {
-                                if (err) {
-                                    callback(err, errorResp(err.message))
-                                } else {
-                                    const sourcePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", file.filename)
-                                    const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", uuid + path.extname(file.filename))
-                                    fs.renameSync(sourcePath, destinationPath)
-                                    callback(null, baseResp(200, "Berhasil Menambah Data"))
-                                }
-                                db2.end()
-                            }
-                        )
-                    } else {
-                        callback(null, badRequestResp())
-                    }
+                    const sourcePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/temp/", file.filename)
+                    const destinationPath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", uuid + path.extname(file.filename))
+                    try {
+                        fs.renameSync(sourcePath, destinationPath)
+                    } catch { }
+                    callback(null, baseResp(200, "Berhasil Menambah Data"))
                 }
+                db.end()
             }
-            db.end()
-        }
-    )
+        )
+    } else {
+        callback(null, badRequestResp())
+    }
 }
 
 export const download = (req: JWTRequest, callback: Function) => {
@@ -189,30 +153,16 @@ export const remove = (req: JWTRequest, callback: Function) => {
                 const row = (<RowDataPacket[]>result)
                 const db2: Connection = mysql.createConnection(dbConfig)
                 db2.query(
-                    "SELECT * FROM loan WHERE data_id = ?",
+                    "DELETE FROM data WHERE id = ?",
                     [deleteDataReq.id],
                     (err) => {
                         if (err) callback(err)
                         else {
-                            const row2 = (<RowDataPacket[]>result)
-                            if (row2.length > 0) {
-                                callback(null, conflictResp("Data Sedang Digunakan"))
-                            } else {
-                                const db3: Connection = mysql.createConnection(dbConfig)
-                                db3.query(
-                                    "DELETE FROM data WHERE id = ?",
-                                    [deleteDataReq.id],
-                                    (err) => {
-                                        if (err) callback(err)
-                                        else {
-                                            const filePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", row[0].file)
-                                            fs.unlinkSync(filePath)
-                                            callback(null, baseResp(200, "Berhasil Menghapus Data"))
-                                        }
-                                        db3.end()
-                                    }
-                                )
-                            }
+                            const filePath = path.join((process.env.SERVER === "production" ? "./dist" : ".") + "/src/uploads/", row[0].file)
+                            try {
+                                fs.unlinkSync(filePath)
+                            } catch { }
+                            callback(null, baseResp(200, "Berhasil Menghapus Data"))
                         }
                         db2.end()
                     }

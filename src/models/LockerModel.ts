@@ -5,7 +5,7 @@ import { CreateLockerReq } from "../types/locker/CreateLockerReq"
 import { DeleteLockerReq } from "../types/locker/DeleteLockerReq"
 import { GetLocker, GetLockersResp } from "../types/locker/GetLockersResp"
 import { UpdateLockerReq } from "../types/locker/UpdateLockerReq"
-import { baseResp, conflictResp } from "../utils/Response"
+import { baseResp } from "../utils/Response"
 import { generateUUID } from "../utils/UUID"
 
 export const getLockers = (req: JWTRequest, callback: Function) => {
@@ -24,6 +24,7 @@ export const getLockers = (req: JWTRequest, callback: Function) => {
             l.id, l.name, l.capacity
         ORDER BY
             locker_name ASC`,
+        [],
         (err, result) => {
             if (err) callback(err)
             else {
@@ -46,30 +47,14 @@ export const getLockers = (req: JWTRequest, callback: Function) => {
 export const create = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     const createLockerReq: CreateLockerReq = req.body
-    const uuid = generateUUID()
+    const uuid = req.body.uuid ?? generateUUID()
     db.query(
-        "SELECT * FROM locker WHERE name = ?",
-        [createLockerReq.name],
+        "INSERT INTO locker VALUES (?, ?, ?)",
+        [uuid, createLockerReq.name, createLockerReq.capacity],
         (err, result) => {
             if (err) callback(err)
             else {
-                const row = (<RowDataPacket[]>result)
-                if (row.length > 0) {
-                    callback(null, conflictResp("Nama Loker Sudah Digunakan"))
-                } else {
-                    const db2: Connection = mysql.createConnection(dbConfig)
-                    db2.query(
-                        "INSERT INTO locker VALUES (?, ?, ?)",
-                        [uuid, createLockerReq.name, createLockerReq.capacity],
-                        (err, result) => {
-                            if (err) callback(err)
-                            else {
-                                callback(null, baseResp(200, "Berhasil Menambah Loker"))
-                            }
-                            db2.end()
-                        }
-                    )
-                }
+                callback(null, baseResp(200, "Berhasil Menambah Loker"))
             }
             db.end()
         }
@@ -83,44 +68,12 @@ export const update = (req: JWTRequest, callback: Function) => {
         id: req.params.id
     }
     db.query(
-        "SELECT * FROM data WHERE locker_id = ?",
-        [updateLockerReq.id],
-        (err, result) => {
+        "UPDATE locker SET name = ?, capacity = ? WHERE id = ?",
+        [updateLockerReq.name, updateLockerReq.capacity, updateLockerReq.id],
+        (err) => {
             if (err) callback(err)
             else {
-                const row = (<RowDataPacket[]>result)
-                if (row.length > 0) {
-                    callback(null, conflictResp("Loker Sedang Digunakan"))
-                } else {
-                    const db2: Connection = mysql.createConnection(dbConfig)
-                    db2.query(
-                        "SELECT * FROM locker WHERE name = ? AND id != ?",
-                        [updateLockerReq.name, updateLockerReq.id],
-                        (err, result) => {
-                            if (err) callback(err)
-                            else {
-                                const row = (<RowDataPacket[]>result)
-                                if (row.length > 0) {
-                                    callback(null, conflictResp("Nama Loker Sudah Digunakan"))
-                                } else {
-                                    const db3: Connection = mysql.createConnection(dbConfig)
-                                    db3.query(
-                                        "UPDATE locker SET name = ?, capacity = ? WHERE id = ?",
-                                        [updateLockerReq.name, updateLockerReq.capacity, updateLockerReq.id],
-                                        (err) => {
-                                            if (err) callback(err)
-                                            else {
-                                                callback(null, baseResp(200, "Berhasil Mengedit Loker"))
-                                            }
-                                            db3.end()
-                                        }
-                                    )
-                                }
-                            }
-                            db2.end()
-                        }
-                    )
-                }
+                callback(null, baseResp(200, "Berhasil Mengedit Loker"))
             }
             db.end()
         }
@@ -133,28 +86,12 @@ export const remove = (req: JWTRequest, callback: Function) => {
         id: req.params.id
     }
     db.query(
-        "SELECT * FROM data WHERE locker_id = ?",
+        "DELETE FROM locker WHERE id = ?",
         [deleteLockerReq.id],
-        (err, result) => {
+        (err) => {
             if (err) callback(err)
             else {
-                const row = (<RowDataPacket[]>result)
-                if (row.length > 0) {
-                    callback(null, conflictResp("Loker Sedang Digunakan"))
-                } else {
-                    const db2: Connection = mysql.createConnection(dbConfig)
-                    db2.query(
-                        "DELETE FROM locker WHERE id = ?",
-                        [deleteLockerReq.id],
-                        (err) => {
-                            if (err) callback(err)
-                            else {
-                                callback(null, baseResp(200, "Berhasil Menghapus Loker"))
-                            }
-                            db2.end()
-                        }
-                    )
-                }
+                callback(null, baseResp(200, "Berhasil Menghapus Loker"))
             }
             db.end()
         }

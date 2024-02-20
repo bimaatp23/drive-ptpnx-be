@@ -1,13 +1,10 @@
 import { Application } from "express"
 import { IncomingHttpHeaders } from "http"
 import { Socket } from "net"
-import path from "path"
-import { Readable } from "stream"
 import { dbConfig } from "../../db"
 import { JWTRequest } from "../types/JWTRequest"
-import { Data } from "../types/data/Data"
-import { generateUUID } from "../utils/UUID"
-import { download, getDatas, remove, update, upload } from "./DataModel"
+import { User } from "../types/user/User"
+import { changePassword, getUsers, login } from "./UserModel"
 
 // Mocking the required dependencies
 jest.mock("mysql2", () => ({
@@ -25,10 +22,10 @@ jest.mock("../../db", () => ({
 jest.mock("../utils/Response", () => ({
     callback: jest.fn(),
     baseResp: jest.fn(),
-    conflictResp: jest.fn()
+    badRequestResp: jest.fn()
 }))
 
-describe("DataModel", () => {
+describe("UserModel", () => {
     // Mocked data for testing
     const mockRequest: JWTRequest = {
         query: {},
@@ -37,28 +34,12 @@ describe("DataModel", () => {
             name: "testName",
             role: "testRole"
         },
-        file: {
-            filename: "testFile.jpg",
-            buffer: Buffer.from([]),
-            destination: "testDestination",
-            fieldname: "testFieldname",
-            mimetype: "testMimetype",
-            originalname: "testOriginalName",
-            path: "testPath",
-            size: 10,
-            stream: new Readable(),
-            encoding: "utf-8"
-        },
         params: {
             id: "testId"
         },
         body: {
-            categoryId: "testCategoryId",
-            lockerId: "testLockerId",
-            date: "2023-01-01",
-            documentNumber: "testDocumentNumber",
-            description: "testDescription",
-            uuid: generateUUID()
+            username: "testUsername",
+            password: "testPassword"
         },
         get: jest.fn(),
         header: jest.fn(),
@@ -155,17 +136,12 @@ describe("DataModel", () => {
         jest.clearAllMocks()
     })
 
-    it("getData()", () => {
+    it("getUsers()", () => {
         // Mock database connection and query result
-        const mockResult: Data = {
-            id: "1",
-            date: "2023-01-01",
-            documentNumber: "doc123",
-            description: "testDescription",
-            file: "testFile.pdf",
-            categoryId: "testCategoryId",
-            lockerId: "testLockerId",
-            author: "testUser"
+        const mockResult: User = {
+            username: "testUsername",
+            name: "testName",
+            role: "testRole"
         }
         const mockConnection = {
             query: jest.fn((query, params, callback) => {
@@ -181,14 +157,14 @@ describe("DataModel", () => {
         require("mysql2").createConnection.mockReturnValue(mockConnection)
 
         // Call the function with the mocked request and callback
-        getDatas(mockRequest, mockCallback)
+        getUsers(mockRequest, mockCallback)
 
         // Ensure createConnection is called with the correct config
         expect(require("mysql2").createConnection).toHaveBeenCalledWith(dbConfig)
 
         // Ensure query is called with the correct SQL and parameters
-        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM data"),
-            [`%%`, `%%`, `%%`, `%%`, mockRequest.payload?.username],
+        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM user"),
+            [],
             expect.any(Function)
         )
 
@@ -196,17 +172,12 @@ describe("DataModel", () => {
         expect(mockConnection.end).toHaveBeenCalled()
     })
 
-    it("upload()", () => {
+    it("login()", () => {
         // Mock database connection and query result
-        const mockResult: Data = {
-            id: "1",
-            date: "2023-01-01",
-            documentNumber: "doc123",
-            description: "testDescription",
-            file: "testFile.pdf",
-            categoryId: "testCategoryId",
-            lockerId: "testLockerId",
-            author: "testUser"
+        const mockResult: User = {
+            username: "testUsername",
+            name: "testName",
+            role: "testRole"
         }
         const mockConnection = {
             query: jest.fn((query, params, callback) => {
@@ -222,14 +193,14 @@ describe("DataModel", () => {
         require("mysql2").createConnection.mockReturnValue(mockConnection)
 
         // Call the function with the mocked request and callback
-        upload(mockRequest, mockCallback)
+        login(mockRequest, mockCallback)
 
         // Ensure createConnection is called with the correct config
         expect(require("mysql2").createConnection).toHaveBeenCalledWith(dbConfig)
 
         // Ensure query is called with the correct SQL and parameters
-        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("INSERT INTO data"),
-            [mockRequest.body.uuid, mockRequest.body.date, mockRequest.body.documentNumber, mockRequest.body.description, mockRequest.body.categoryId, mockRequest.body.lockerId, mockRequest.body.uuid + path.extname(mockRequest.file?.filename ?? ""), mockRequest.payload?.username],
+        expect(mockConnection.query).toHaveBeenCalledWith("SELECT * FROM user WHERE username = ? AND password = ?",
+            [mockRequest.body.username, mockRequest.body.password],
             expect.any(Function)
         )
 
@@ -237,17 +208,12 @@ describe("DataModel", () => {
         expect(mockConnection.end).toHaveBeenCalled()
     })
 
-    it("download()", () => {
+    it("changePassword()", () => {
         // Mock database connection and query result
-        const mockResult: Data = {
-            id: "1",
-            date: "2023-01-01",
-            documentNumber: "doc123",
-            description: "testDescription",
-            file: "testFile.pdf",
-            categoryId: "testCategoryId",
-            lockerId: "testLockerId",
-            author: "testUser"
+        const mockResult: User = {
+            username: "testUsername",
+            name: "testName",
+            role: "testRole"
         }
         const mockConnection = {
             query: jest.fn((query, params, callback) => {
@@ -260,37 +226,10 @@ describe("DataModel", () => {
         }
 
         // Mock mysql2.createConnection to return the mocked connection
-        require("mysql2").createConnection.mockReturnValue(mockConnection)
+        require("mysql2").createConnection.mockReturnValueOnce(mockConnection)
 
-        // Call the function with the mocked request and callback
-        download(mockRequest, mockCallback)
-
-        // Ensure createConnection is called with the correct config
-        expect(require("mysql2").createConnection).toHaveBeenCalledWith(dbConfig)
-
-        // Ensure query is called with the correct SQL and parameters
-        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM data"),
-            [mockRequest.params.id],
-            expect.any(Function)
-        )
-
-        // Ensure db.end is called
-        expect(mockConnection.end).toHaveBeenCalled()
-    })
-
-    it("update()", () => {
-        // Mock database connection and query result
-        const mockResult: Data = {
-            id: "1",
-            date: "2023-01-01",
-            documentNumber: "doc123",
-            description: "testDescription",
-            file: "testFile.pdf",
-            categoryId: "testCategoryId",
-            lockerId: "testLockerId",
-            author: "testUser"
-        }
-        const mockConnection = {
+        // Mock database connection for update
+        const mockUpdateConnection = {
             query: jest.fn((query, params, callback) => {
                 const result = [mockResult]
                 if (callback && typeof callback === "function") {
@@ -300,63 +239,27 @@ describe("DataModel", () => {
             end: jest.fn()
         }
 
-        // Mock mysql2.createConnection to return the mocked connection
-        require("mysql2").createConnection.mockReturnValue(mockConnection)
+        // Mock mysql2.createConnection to return the mocked update connection
+        require("mysql2").createConnection.mockReturnValueOnce(mockUpdateConnection)
 
         // Call the function with the mocked request and callback
-        update(mockRequest, mockCallback)
+        changePassword(mockRequest, mockCallback)
 
         // Ensure createConnection is called with the correct config
         expect(require("mysql2").createConnection).toHaveBeenCalledWith(dbConfig)
 
         // Ensure query is called with the correct SQL and parameters
-        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("UPDATE data SET"),
-            [mockRequest.body.date, mockRequest.body.documentNumber, mockRequest.body.description, mockRequest.params.id],
+        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM user"),
+            [mockRequest.payload?.username, mockRequest.body.oldPassword],
+            expect.any(Function)
+        )
+        expect(mockUpdateConnection.query).toHaveBeenCalledWith(expect.stringContaining("UPDATE user SET"),
+            [mockRequest.body.newPassword, mockRequest.payload?.username],
             expect.any(Function)
         )
 
-        // Ensure db.end is called
+        // Ensure db.end is called for both connections
         expect(mockConnection.end).toHaveBeenCalled()
-    })
-
-    it("remove()", () => {
-        // Mock database connection and query result
-        const mockResult: Data = {
-            id: "1",
-            date: "2023-01-01",
-            documentNumber: "doc123",
-            description: "testDescription",
-            file: "testFile.pdf",
-            categoryId: "testCategoryId",
-            lockerId: "testLockerId",
-            author: "testUser"
-        }
-        const mockConnection = {
-            query: jest.fn((query, params, callback) => {
-                const result = [mockResult]
-                if (callback && typeof callback === "function") {
-                    callback(null, result)
-                }
-            }),
-            end: jest.fn()
-        }
-
-        // Mock mysql2.createConnection to return the mocked connection
-        require("mysql2").createConnection.mockReturnValue(mockConnection)
-
-        // Call the function with the mocked request and callback
-        remove(mockRequest, mockCallback)
-
-        // Ensure createConnection is called with the correct config
-        expect(require("mysql2").createConnection).toHaveBeenCalledWith(dbConfig)
-
-        // Ensure query is called with the correct SQL and parameters
-        expect(mockConnection.query).toHaveBeenCalledWith(expect.stringContaining("DELETE FROM data"),
-            [mockRequest.params.id],
-            expect.any(Function)
-        )
-
-        // Ensure db.end is called
-        expect(mockConnection.end).toHaveBeenCalled()
+        expect(mockUpdateConnection.end).toHaveBeenCalled()
     })
 })

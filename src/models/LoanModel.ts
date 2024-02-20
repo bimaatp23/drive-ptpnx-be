@@ -14,6 +14,7 @@ export const getLoans = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     db.query(
         "SELECT * FROM loan",
+        [],
         (err, result) => {
             if (err) callback(err)
             else {
@@ -39,7 +40,7 @@ export const getLoans = (req: JWTRequest, callback: Function) => {
 export const create = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     const createLoanReq: CreateLoanReq = req.body
-    const uuid = generateUUID()
+    const uuid = req.body.uuid ?? generateUUID()
     const currentDate = moment()
     const loanDate: string = currentDate.format("YYYY-MM-DD HH:mm:ss")
     const dueDate: string = currentDate.add(1, "days").format("YYYY-MM-DD HH:mm:ss")

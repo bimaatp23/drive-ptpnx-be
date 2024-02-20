@@ -12,7 +12,7 @@ export const getUsers = (req: JWTRequest, callback: Function) => {
     const db: Connection = mysql.createConnection(dbConfig)
     db.query(
         "SELECT * FROM user",
-        null,
+        [],
         (err, result) => {
             if (err) callback(err)
             else {
@@ -87,6 +87,7 @@ export const changePassword = (req: JWTRequest, callback: Function) => {
                                 } else {
                                     callback(null, baseResp(200, "Berhasil Mengganti Password"))
                                 }
+                                db2.end()
                             }
                         )
                     }
